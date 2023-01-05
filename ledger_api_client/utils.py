@@ -9,6 +9,7 @@ from decimal import InvalidOperation
 from babel.numbers import format_currency
 from django.utils.translation import get_language, to_locale
 from django.core.cache import cache
+from decimal import *
 
 def oracle_parser(): 
     pass
@@ -385,9 +386,9 @@ class OrderLine:
 
 
 def calculate_excl_gst(amount):
-    TWELVEPLACES = D(10) ** -12
+    TWELVEPLACES = Decimal(10) ** -12
     getcontext().prec = 22
-    result = (D(100.0) / D(100 + settings.LEDGER_GST) * D(amount)).quantize(TWELVEPLACES)
+    result = (Decimal(100.0) / Decimal(100 + settings.LEDGER_GST) * Decimal(amount)).quantize(TWELVEPLACES)
     return result
 
 #@register.filter(name='currency')
