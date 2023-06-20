@@ -325,7 +325,8 @@ def get_or_create(email):
     try:
         print (resp.text)
         resp_json = resp.json()
-    except:
+    except Exception as e:
+        print (e)
         resp_json = {}
     return resp_json
 
@@ -337,9 +338,38 @@ def get_organisation(organisation_id):
     resp_json = {}
     try:
         resp_json = resp.json()
-    except:
+    except Exception as e:
+        print (e)
         resp_json = {}
     return resp_json
+
+def get_all_organisation():
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get_all_organisation/'+api_key+'/'
+    myobj = {'data': {}}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except Exception as e:
+        print (e)
+        resp_json = {}
+    return resp_json
+
+def get_search_organisation(organisation_name, organisation_abn):
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/get_search_organisation/'+api_key+'/'
+    myobj = {'data': json.dumps({'organisation_name': organisation_name, 'organisation_abn': organisation_abn})}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try:        
+        resp_json = resp.json()
+        
+    except Exception as e:
+        print (e)
+        resp_json = {}
+    return resp_json
+
 
 def create_organisation(organisation_name, organisation_abn):
     api_key = settings.LEDGER_API_KEY
@@ -353,17 +383,41 @@ def create_organisation(organisation_name, organisation_abn):
         resp_json = {}
     return resp_json
 
-def update_organisation(organisation_id, organisation_name, organisation_abn):
+def update_organisation(organisation_id, organisation_name, organisation_abn, organisation_trading_name, organisation_email):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/update_organisation/'+api_key+'/'
-    myobj = {'data': json.dumps({'organisation_id': organisation_id, 'organisation_name': organisation_name, 'organisation_abn': organisation_abn})}
+    myobj = {'data': json.dumps({'organisation_id': organisation_id, 'organisation_name': organisation_name, 'organisation_abn': organisation_abn, 'organisation_trading_name': organisation_trading_name, 'organisation_email': organisation_email})}
     resp = requests.post(url, data=myobj)
     resp_json = {}
     try:        
         resp_json = resp.json()
     except:
         resp_json = {}
-    return resp_json
+    return resp_json    
+
+def update_organisation_obj(org_obj):
+    """
+        org_obj = 
+        {'organisation_id': organisation_id, 'organisation_name': organisation_name, 'organisation_abn': organisation_abn, 'organisation_trading_name': organisation_trading_name, 'organisation_email': organisation_email}
+
+        organisation_id is mandatory all other keys optional
+
+    """
+    if 'organisation_id' not in org_obj:
+        resp_json = {"status" : 404,  "message": "no organisation_id provided"}
+        return resp_json
+        
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/update_organisation/'+api_key+'/'
+    myobj = {'data': json.dumps(org_obj)}
+    resp = requests.post(url, data=myobj)
+    resp_json = {}
+    try: 
+        resp_json = resp.json()                
+    except Exception as e:
+        print (e)
+        resp_json = {}
+    return resp_json  
 
 def get_organisation(organisation_id):
     api_key = settings.LEDGER_API_KEY

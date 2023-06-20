@@ -15,26 +15,22 @@
 {% endblock %}
 
 {% block  top_menu %}
-<li>
+    <li>
+      <button type="button" class="btn btn-sm btn-secondary">
+        Notification 1 <span class="badge bg-danger">14</span>
+      </button>
+    </li>
+    <li>
          <button type="button" class="btn btn-sm btn-secondary">
-                  Notification 1 <span class="badge bg-danger">14</span>
+            Notification 1 <span class="badge bg-danger">14</span>
          </button>
 
-</li>
-
-<li>
+    </li>
+    <li>
          <button type="button" class="btn btn-sm btn-secondary">
-                  Notification 1 <span class="badge bg-danger">14</span>
+            Notification 1 <span class="badge bg-danger">14</span>
          </button>
-
-</li>
-
-<li>
-         <button type="button" class="btn btn-sm btn-secondary">
-                  Notification 1 <span class="badge bg-danger">14</span>
-         </button>
-
-</li>
+    </li>
 {% endblock %}
 
 
@@ -70,13 +66,11 @@
             </div>
         </div>
         {% endif %}
-	<div class="col-lg-12">
-
-		<div id='content-payment-body'>
-
-			{{ data|safe }}
-		</div>
-	</div>
+        <div class="col-lg-12">
+          <div id='content-payment-body'>            
+            {{ data|safe }}
+          </div>
+        </div>
 
 
 
@@ -84,16 +78,22 @@
             <div class="col">
                 {% block page_content_inner %}
 <br>
+
+{% block accounts_message_top %}
+{% endblock %}
+
+
+
 <nav class='pb-1'>
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
     <button class="nav-link active managed-account-nav" id="nav-details-tab" data-bs-toggle="tab" data-bs-target="#nav-details" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Details</button>
-    {% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
-        <button class="nav-link managed-account-nav " id="nav-cards-tab" data-bs-toggle="tab" data-bs-target="#nav-cards" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Manage Cards</button>
-    {% endif %}
-    {% block myaccount_nav %}
-       <button class="nav-link  managed-account-nav" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Other1</button>
-       <button class="nav-link  managed-account-nav" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Other2</button>
-    {% endblock %}
+        {% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
+            <button class="nav-link managed-account-nav " id="nav-cards-tab" data-bs-toggle="tab" data-bs-target="#nav-cards" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Manage Cards</button>
+        {% endif %}
+        {% block myaccount_nav %}
+            <button class="nav-link  managed-account-nav" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Other1</button>
+            <button class="nav-link  managed-account-nav" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Other2</button>
+        {% endblock %}
   </div>
 </nav>
 
@@ -115,7 +115,6 @@
      <div id="ledger_ui_account_details"></div>
   </div>
 </div>
-
 <br>
 {% endif %}
 
@@ -313,9 +312,15 @@ ledger_management.init({{ request.user.id }});
   </div>
 </div>
 {% endif %}
-</div>
 
+
+{% block accounts_message_bottom %}
 {% endblock %}
+</div>
+{% endblock %}
+
+
+
 
 {% block page_footer %}
 <footer class="footer mt-auto py-3">

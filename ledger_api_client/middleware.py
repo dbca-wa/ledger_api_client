@@ -144,3 +144,12 @@ class SSOLoginMiddleware(MiddlewareMixin):
                  request.session.set_expiry(SESSION_EXPIRY_SSO)
                  login(request, user)
                  del request.session['is_authenticated']
+                 try:
+                    is_authenticated = request.user.is_authenticated
+                    request.session['is_authenticated'] = is_authenticated
+                    user_obj = {'user_id': request.user.id, 'email': request.user.email, 'first_name': request.user.first_name, 'last_name': request.user.last_name, 'is_staff': request.user.is_staff}
+                    request.session['user_obj'] = user_obj
+                 except Exception as e:
+                     print ("ERROR in sso middleware logging in")
+                     print (e)
+                        
