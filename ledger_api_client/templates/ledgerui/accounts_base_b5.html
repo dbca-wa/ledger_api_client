@@ -49,6 +49,7 @@
 
 
 {% block content %}
+{% if request.session.is_authenticated %}
    <script type="text/javascript" src="/static/ledger_api/js/ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
    <input type='hidden' value='{{ csrf_token }}' id='ledger_ui_csrf_token' >
    <div class="container">
@@ -103,7 +104,7 @@
   <div class="card-header fw-bold h4" style='padding:30px;'>
         <div class='row'>
           <div class='col-6'>
-                <i class="bi bi-check-circle-fill" style='color: #08c508;'></i>&nbsp;  Personal Details
+                <span id='personal-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp;  Personal Details
           </div>
           <div class='col-6 text-end'>
                 <i class="bi fw-bold chevron-toggle" data-bs-target="#ledger_ui_account_details-card-body"></i>
@@ -124,7 +125,7 @@
          <div class='row'>
 
           <div class='col-6'>
-                <i class="bi bi-x-circle-fill" style='color: #ff0909'></i>&nbsp;  Identification Details
+            <span id='identification-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp;  Identification Details
 
           </div>
           <div class='col-6 text-end'>
@@ -148,7 +149,7 @@
   <div class="card-header fw-bold h4" style='padding:30px;'> 
     <div class='row'>
 	  <div class='col-6'>
-                <i class="bi bi-check-circle-fill" style='color: #08c508;'></i>&nbsp; Address Details
+      <span id='address-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp; Address Details
 
 	  </div>
 	  <div class='col-6 text-end'>
@@ -170,7 +171,7 @@
     <div class='row'>
 
           <div class='col-6'>
-                <i class="bi bi-check-circle-fill" style='color: #08c508;'></i>&nbsp; Contact Details
+            <span id='contact-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp; Contact Details
           </div>
           <div class='col-6 text-end'>
                 <i class="bi fw-bold chevron-toggle" data-bs-target="#ledger_ui_contact-details-card-body"></i>
@@ -311,11 +312,26 @@ ledger_management.init({{ request.user.id }});
     </div>
   </div>
 </div>
+	   
 {% endif %}
 
+{% block additional_content %}
+{% endblock %}	   
 
+	   
 {% block accounts_message_bottom %}
 {% endblock %}
+
+
+{% else %}  
+  <div class="container">
+    <BR>
+    <div class='alert alert-danger'>
+      Your are currently not logged. Please login to access this page.
+    </div>
+  </div>
+{% endif %}
+
 </div>
 {% endblock %}
 

@@ -456,6 +456,9 @@ def get_account_details(request, user_id):
     if allow_access is True:
         with urllib.request.urlopen(settings.LEDGER_API_URL+"/ledgergw/remote/userid/"+user_id+"/"+settings.LEDGER_API_KEY+"/", data) as url:
               json_response = json.loads(url.read().decode())
+        resp["information_status"] = json_response['information_status']
+        if 'postal_same_as_residential' not in resp['data']:
+            resp['data']['postal_same_as_residential'] = False
 
         for la in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT:
             field_key = list(la.keys())[0]
@@ -463,6 +466,51 @@ def get_account_details(request, user_id):
             if field_key in json_response['user']:
                   resp['data'][field_key] = json_response['user'][field_key]
             resp['status'] = 200
+
+        # personal details validation
+        if 'dob' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT:
+            if len(resp['data']['dob']) == 10:
+                resp['information_status']["personal_details_completed"] = True
+        else:
+            resp['information_status']["personal_details_completed"] = True
+        
+        # contact details validation
+        if 'phone_number' in resp['data']  or 'mobile_number' in resp['data']:  
+            if  resp['data']['mobile_number'] is None:
+                resp['data']['mobile_number'] = ''
+            if  resp['data']['phone_number'] is None:
+                resp['data']['phone_number'] = ''
+
+            if len(resp['data']['mobile_number']) >= 10 or len(resp['data']['phone_number']) >= 10:   
+                print ("TRIE")             
+                resp['information_status']["contact_details_completed"] = True
+
+        # address validation
+        print (resp['data'])
+        if 'postal_address' in resp['data']  and 'residential_address' in resp['data']: 
+                if len(resp['data']['residential_address']['line1']) < 3 or len(resp['data']['residential_address']['locality']) < 3 or len(resp['data']['residential_address']['postcode']) < 3 or len(resp['data']['residential_address']['state']) < 2:
+                    pass
+                else:
+                    if resp['data']['postal_same_as_residential'] is True:
+                        resp['information_status']["address_details_completed"] = True
+                    else:
+                        if len(resp['data']['postal_address']['line1']) < 3 or len(resp['data']['postal_address']['locality']) < 3 or len(resp['data']['postal_address']['postcode']) < 3 or len(resp['data']['postal_address']['state']) < 2:
+                            pass
+                        else:
+                            resp['information_status']["address_details_completed"] = True
+                            
+        else:
+            if 'postal_address' in resp['data']:
+                if len(resp['data']['postal_address']['line1']) < 3 or len(resp['data']['postal_address']['locality']) < 3 or len(resp['data']['postal_address']['postcode']) < 3 or len(resp['data']['postal_address']['state']) < 2:
+                    pass
+                else:
+                    resp['information_status']["address_details_completed"] = True                     
+            
+            if 'residential_address' in resp['data']:
+                if len(resp['data']['residential_address']['line1']) < 3 or len(resp['data']['residential_address']['locality']) < 3 or len(resp['data']['residential_address']['postcode']) < 3 or len(resp['data']['residential_address']['state']) < 2:
+                    pass
+                else:
+                    resp['information_status']["address_details_completed"] = True                       
     else:
         resp['status'] = 403
         resp['message'] = "Denied"

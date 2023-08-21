@@ -2,6 +2,11 @@ var ledger_management = {
 	var: {
                 config: {},
 		        data:  {accounts: {user_id: null, org_id: null}},
+                information_status: {
+                    'address_details_completed': false,
+                    'contact_details_completed' : false,
+                    'personal_details_completed' : false
+                },
                 countries: [],
                 account_data: {},
 	            address: {},
@@ -138,9 +143,8 @@ var ledger_management = {
                      data: JSON.stringify({'payload': data,}),
                      contentType: "application/json",
                      success: function(data) {
-			     ledger_management.get_account_details();
-
-                          console.log('Success');
+			            ledger_management.get_account_details();
+                        console.log('Success');
                      },
                      error: function (error) {
                           console.log('Error updating account information');
@@ -165,6 +169,7 @@ var ledger_management = {
                                 ledger_management.var.is_loading = false;
                                 ledger_management.var.steps['step4'].loading = false;
                                 ledger_management.var.steps['step4'].completed = true;
+                                ledger_management.var.information_status = response.information_status;
 
                            },
                            error: function(error) {
@@ -249,7 +254,16 @@ var ledger_management = {
                     if (ledger_management.var.config.hasOwnProperty('dob') == true ) {
                     } else {
                             $('#div-ledger-ui-dob-name').hide();
-                    }                
+                    }       
+                    
+                    
+
+                    if (ledger_management.var.information_status.personal_details_completed == true) { 
+                        $('#personal-details-status').html('<i class="bi bi-check-circle-fill" style="color: #08c508;"></i>');
+
+                    } else {
+                        $('#personal-details-status').html('<i class="bi bi-x-circle-fill" style="color: #ff0909"></i>');
+                    }
                 },
                 get_data_loading: function() {
                     $('#div-ledger-ui-accounts').hide();
@@ -430,23 +444,23 @@ var ledger_management = {
                     }
                     $('#input-ledger-ui-residential-address-country').html(countries_select_html);
                     $('#input-ledger-ui-postal-address-country').html(countries_select_html);
-		    if ('residential_address' in ledger_management.var.config) {
-                    //if ('residential_line1' in ledger_management.var.config ) {
-                        $('#input-ledger-ui-residential-address-line1').val(ledger_management.var.account_data.residential_address.line1); 
-                    //}
-                    //if ('residential_locality' in ledger_management.var.config ) {
-                        $('#input-ledger-ui-residential-address-locality').val(ledger_management.var.account_data.residential_address.locality);
-                    //}
-                    //if ('residential_state' in ledger_management.var.config ) {
-                        $('#input-ledger-ui-residential-address-state').val(ledger_management.var.account_data.residential_address.state);
-                    //}
-                    //if ('residential_postcode' in ledger_management.var.config ) {
-                        $('#input-ledger-ui-residential-address-postcode').val(ledger_management.var.account_data.residential_address.postcode);
-                    //}
-                    //if ('residential_country' in ledger_management.var.config ) {
-                        $('#input-ledger-ui-residential-address-country').val(ledger_management.var.account_data.residential_address.country);
-                    //}
-		    }
+                    if ('residential_address' in ledger_management.var.config) {
+                            //if ('residential_line1' in ledger_management.var.config ) {
+                                $('#input-ledger-ui-residential-address-line1').val(ledger_management.var.account_data.residential_address.line1); 
+                            //}
+                            //if ('residential_locality' in ledger_management.var.config ) {
+                                $('#input-ledger-ui-residential-address-locality').val(ledger_management.var.account_data.residential_address.locality);
+                            //}
+                            //if ('residential_state' in ledger_management.var.config ) {
+                                $('#input-ledger-ui-residential-address-state').val(ledger_management.var.account_data.residential_address.state);
+                            //}
+                            //if ('residential_postcode' in ledger_management.var.config ) {
+                                $('#input-ledger-ui-residential-address-postcode').val(ledger_management.var.account_data.residential_address.postcode);
+                            //}
+                            //if ('residential_country' in ledger_management.var.config ) {
+                                $('#input-ledger-ui-residential-address-country').val(ledger_management.var.account_data.residential_address.country);
+                            //}
+                    }
 
 		    if ('postal_address' in ledger_management.var.config ) {
 
@@ -475,6 +489,9 @@ var ledger_management = {
                                  $('#input-ledger-ui-postal-address-same-as-residential').prop('checked', false);
 		         }
                          ledger_management.address.postal_address_disabled();
+
+
+                   
 		    }
 		    $('#div-ledger-ui-residential-address').show();
                     $('#div-ledger-ui-residential-address-loader').hide();
@@ -509,6 +526,12 @@ var ledger_management = {
                     } else {
                         $('#div-ledger-ui-postal-address-same-as-residential').show();
                     }
+
+                    if (ledger_management.var.information_status.address_details_completed == true) { 
+                        $('#address-details-status').html('<i class="bi bi-check-circle-fill" style="color: #08c508;"></i>');
+                    } else {
+                        $('#address-details-status').html('<i class="bi bi-x-circle-fill" style="color: #ff0909"></i>');
+                    }      
 
                 },
                 get_data_loading: function() {
@@ -763,6 +786,12 @@ var ledger_management = {
                     $('#input-ledger-ui-contact-mobile').val(ledger_management.var.account_data.mobile_number);
                     $('#div-ledger-ui-contact').show();
                     $('#div-ledger-ui-contact-loader').hide();
+                    if (ledger_management.var.information_status.contact_details_completed == true) { 
+                        $('#contact-details-status').html('<i class="bi bi-check-circle-fill" style="color: #08c508;"></i>');
+                    } else {
+                        $('#contact-details-status').html('<i class="bi bi-x-circle-fill" style="color: #ff0909"></i>');
+                    }   
+
                 },
                 get_data_loading: function() {
                     $('#div-ledger-ui-contact').hide();
