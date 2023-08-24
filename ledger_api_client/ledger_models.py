@@ -3,7 +3,7 @@ import traceback
 from django.db import models, transaction
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField, IntegerRangeField
+from django.db.models import JSONField
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser #PermissionsMixin
 from django.utils import timezone
 from django.db import models
@@ -629,9 +629,9 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
 
     residential_address = models.ForeignKey(Address, null=True, blank=False, related_name='+', on_delete=models.DO_NOTHING)
     postal_address = models.ForeignKey(Address, null=True, blank=True, related_name='+', on_delete=models.DO_NOTHING)
-    postal_same_as_residential = models.NullBooleanField(default=False) 
+    postal_same_as_residential = models.BooleanField(default=False) 
     billing_address = models.ForeignKey(Address, null=True, blank=True, related_name='+', on_delete=models.DO_NOTHING)
-    billing_same_as_residential = models.NullBooleanField(default=False)
+    billing_same_as_residential = models.BooleanField(default=False)
 
     identification = models.ForeignKey(Document, null=True, blank=True, on_delete=models.SET_NULL, related_name='identification_document')
     identification2 = models.ForeignKey(PrivateDocument, null=True, blank=True, on_delete=models.SET_NULL, related_name='identification_document_2')
