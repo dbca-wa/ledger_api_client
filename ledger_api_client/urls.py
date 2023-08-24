@@ -1,12 +1,14 @@
-from django.conf.urls import url, include
-from django.contrib import admin
-from django.views.generic import TemplateView
+import django
+
+if django.VERSION[0] >= 4:
+    from django.urls import re_path as url
+else:
+    from django.conf.urls import url
+
 from ledger_api_client import views
 from ledger_api_client import api
-from django.contrib.auth import logout, login
 from django.contrib.auth.views import LogoutView, LoginView
 from django.conf import settings
-from django.urls import path
 
 urlpatterns = [
         url(r'^ledger-api/payment-details$', views.PaymentDetailCheckout.as_view(), name='ledgergw-payment-details'),
