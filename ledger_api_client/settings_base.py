@@ -150,13 +150,13 @@ DATABASES = {
     'default': database.config(),
 }
 if len(sys.argv) > 1:
-   if sys.argv[1] == 'makemigrations' or sys.argv[1] == 'migrate':
-      print ("Skipping ledger_db")
-      pass
-   else: 
-      DATABASES['ledger_db'] =  dj_database_url.config(env='LEDGER_DATABASE_URL')
+    if sys.argv[1] == 'makemigrations' or sys.argv[1] == 'migrate':
+        print ("Skipping ledger_db")
+        pass
+    else: 
+        DATABASES['ledger_db'] =  dj_database_url.config(env='LEDGER_DATABASE_URL')
 else:
-   DATABASES['ledger_db'] =  dj_database_url.config(env='LEDGER_DATABASE_URL')
+    DATABASES['ledger_db'] =  dj_database_url.config(env='LEDGER_DATABASE_URL')
 
 
 
