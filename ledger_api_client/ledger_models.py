@@ -193,35 +193,35 @@ class BaseAddress(models.Model):
     #               self.state, str(self.country.name), self.postcode])
     #    self.search_text = ' '.join(search_fields)
 
-    #@property
-    #def summary(self):
-    #    """Returns a single string summary of the address, separating fields
-    #    using commas.
-    #    """
-    #    return u', '.join(self.active_address_fields())
+    @property
+    def summary(self):
+       """Returns a single string summary of the address, separating fields
+       using commas.
+       """
+       return u', '.join(self.active_address_fields())
 
 
     ## Helper methods
-    #def active_address_fields(self):
-    #    """Return the non-empty components of the address.
-    #    """
-    #    fields = [self.line1, self.line2, self.line3,
-    #              self.locality, self.state, self.country, self.postcode]
-    #    #for f in fields:
-    #    #    print unicode(f).encode('utf-8').decode('unicode-escape').strip()
-    #    #fields = [str(f).strip() for f in fields if f]
-    #    print ("ENCODIUNG")
-    #    for f in fields:
-    #        print (f)
-    #        if f:
-    #            print (str(f))
-    #    print ("END ")
-    #    #print ([f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f])
-    #    fields = [str(f) for f in fields if f]
-    #    #fields = [f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
-    #    #fields = [unicode_compatible(f).encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
+    def active_address_fields(self):
+       """Return the non-empty components of the address.
+       """
+       fields = [self.line1, self.line2, self.line3,
+                 self.locality, self.state, self.country, self.postcode]
+       #for f in fields:
+       #    print unicode(f).encode('utf-8').decode('unicode-escape').strip()
+       #fields = [str(f).strip() for f in fields if f]
+       
+       for f in fields:
+           print (f)
+           if f:
+               print (str(f))
+       
+       #print ([f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f])
+       fields = [str(f) for f in fields if f]
+       #fields = [f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
+       #fields = [unicode_compatible(f).encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
 
-    #    return fields
+       return fields
 
     #def join_fields(self, fields, separator=u', '):
     #    """Join a sequence of fields using the specified separator.
