@@ -15,3 +15,5 @@ recursive-include ledger_api_client/static/ledger_api/ *.js
 recursive-include ledger_api_client/templates *.html *.txt
 recursive-include ledger_api_client/templates/payments *.html *.txt
 
+recursive-include ledger_api_client/static/ledger_api_client_node_modules/ *.js
+recursive-include ledger_api_client/static/ledger_api_client_node_modules/ *.css

@@ -6,8 +6,11 @@ from django.utils.deprecation import MiddlewareMixin
 import urllib.request, json
 import urllib.parse
 from django.contrib import messages
-from confy import env
+# from confy import env
 from django.http import Http404, HttpResponse, JsonResponse, HttpResponseRedirect
+from ledger_api_client import managed_models
+from ledger_api_client import utils
+import datetime
 
 class SSOLoginMiddleware(MiddlewareMixin):
 
@@ -93,7 +96,7 @@ class SSOLoginMiddleware(MiddlewareMixin):
 
                  for key, value in attributemap.items():
                      if value in request.META:
-                         attributemap[key] = request.META[value]
+                         attributemap[key] = utils.remove_html_tags(request.META[value])
 
                  if hasattr(settings, 'ALLOWED_EMAIL_SUFFIXES') and settings.ALLOWED_EMAIL_SUFFIXES:
                      allowed = settings.ALLOWED_EMAIL_SUFFIXES
@@ -123,7 +126,6 @@ class SSOLoginMiddleware(MiddlewareMixin):
                      response = HttpResponse("<h1>Error Connecting to Ledger GW</h1>")
                      return response
 
-
                  if 'user' in json_response:
                      attributemap['ledger_id'] = json_response['user']['ledgerid']
                      attributemap['ledger_data'] = json_response['user']
@@ -149,6 +151,21 @@ class SSOLoginMiddleware(MiddlewareMixin):
                     request.session['is_authenticated'] = is_authenticated
                     user_obj = {'user_id': request.user.id, 'email': request.user.email, 'first_name': request.user.first_name, 'last_name': request.user.last_name, 'is_staff': request.user.is_staff}
                     request.session['user_obj'] = user_obj
+                    su = managed_models.SystemUser.objects.filter(email=request.user.email)
+                    if su.count() > 0:                        
+                        #su_obj = managed_models.SystemUser
+                        #su_obj.change_by_user_id = su.id
+                        suo = managed_models.SystemUser.objects.get(id=su[0].id)
+                        suo.first_name = request.user.first_name
+                        suo.last_name = request.user.last_name
+                        suo.email = request.user.email
+                        suo.last_login = datetime.datetime.now()           
+                        suo.ledger_id_id = request.user.id  # Must use _id_id to prevent OneToOne Lookup Issue
+                        suo.change_by_user_id = su[0].id           
+                        suo.save()                        
+                    else:
+                        su = managed_models.SystemUser.objects.create(ledger_id=request.user, email=request.user.email ,first_name=request.user.first_name, last_name=request.user.last_name, is_active=True, last_login=datetime.datetime.now())
+
                  except Exception as e:
                      print ("ERROR in sso middleware logging in")
                      print (e)

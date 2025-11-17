@@ -5,7 +5,9 @@ from django.conf import settings
 from django.core import exceptions
 from django.db import models
 #from django.utils.encoding import python_2_unicode_compatible
-from django.utils.six.moves import filter
+# from django.utils.six.moves import filter
+from django5_six.utils import six
+
 #from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
 from django.utils.translation import gettext_lazy as _
@@ -300,7 +302,7 @@ class AbstractAddress(models.Model):
     #                {'postcode': [msg]})
 
     def _update_search_text(self):
-        search_fields = filter(
+        search_fields = six.moves.filter(
             bool, [self.first_name, self.last_name,
                    self.line1, self.line2, self.line3, self.line4,
                    self.state, self.postcode, self.country.name])
@@ -377,7 +379,7 @@ class AbstractAddress(models.Model):
         Join a sequence of fields using the specified separator
         """
         field_values = self.get_field_values(fields)
-        return separator.join(filter(bool, field_values))
+        return separator.join(six.moves.filter(bool, field_values))
 
     def populate_alternative_model(self, address_model):
         """

@@ -1,0 +1,5 @@
+{% if settings.LEDGER_TEMPLATE == 'bootstrap5' %}
+   {% include "ledgerui/system_accounts_base_b5.html" %}
+{% else %}
+   This template only supports systems with bootstrap5
+{% endif %}

@@ -34,3 +34,9 @@ margin:0px;
    z-index: 10;
 }
 
+.asteriskField {
+   color: red;
+}
+.form-horizontal label {
+   font-weight: bold;
+}

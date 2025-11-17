@@ -13,7 +13,7 @@ from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.template import loader, Template, Context
 from django.utils.html import strip_tags
 from ledger_api_client.ledger_models import Document
-from confy import env
+import decouple
 
 logger = logging.getLogger('log')
 
@@ -55,7 +55,7 @@ class EmailBase(object):
         :param reply_to:
         :return:
         """
-        email_instance = env('EMAIL_INSTANCE','DEV')
+        email_instance = decouple.config('EMAIL_INSTANCE',default='DEV')
         # The next line will throw a TemplateDoesNotExist if html template cannot be found
         html_template = loader.get_template(self.html_template)
         # render html
@@ -124,7 +124,7 @@ class EmailBase2(object):
         :param reply_to:
         :return:
         """
-        email_instance = env('EMAIL_INSTANCE','DEV')
+        email_instance = decouple.config('EMAIL_INSTANCE',default='DEV')
         # The next line will throw a TemplateDoesNotExist if html template cannot be found
         html_template = loader.get_template(self.html_template)
         # render html
@@ -171,11 +171,11 @@ class EmailBase2(object):
 
 
 def sendHtmlEmail(to,subject,context,template,cc,bcc,from_email,template_group,attachments=None):
-    email_instance = env('EMAIL_INSTANCE','DEV')
-    email_delivery = env('EMAIL_DELIVERY', 'off')
-    override_email = env('OVERRIDE_EMAIL', None)
-    context['default_url'] = env('DEFAULT_HOST', '')
-    context['default_url_internal'] = env('DEFAULT_URL_INTERNAL', '')
+    email_instance = decouple.config('EMAIL_INSTANCE',default='DEV')
+    email_delivery = decouple.config('EMAIL_DELIVERY', default='off')
+    override_email = decouple.config('OVERRIDE_EMAIL', default=None)
+    context['default_url'] = decouple.config('DEFAULT_HOST', default='')
+    context['default_url_internal'] = decouple.config('DEFAULT_URL_INTERNAL', default='')
     log_hash = int(hashlib.sha1(str(datetime.datetime.now()).encode('utf-8')).hexdigest(), 16) % (10 ** 8)
     email_log(str(log_hash)+' '+subject+":"+str(to)+":"+template_group)
     if email_delivery != 'on':

@@ -1,0 +1,68 @@
+{% load crispy_forms_tags %}
+
+{% block page_content_inner %}
+<div class="row mx-md-n5 border p-2 ms-3 me-3 mb-3">  
+    {% if save_success is  True %}
+        <div class="alert alert-success update-alert">Successfully Updated</div>
+        <script>
+            $('.update-alert').delay(5000).fadeOut(400);
+            system_ledger_management.load_address_details();
+            setTimeout(function() {                
+                $('#id_create_edit_address_information_modal').modal('hide');
+                
+                
+            }, 2000);
+            $('#system-account-management-table').dataTable().api().ajax.reload();
+        </script>
+    {% else %}      
+    
+    <form name='address_information_edit' id='id_address_information_edit' class="form-horizontal" action="/ledger-ui/crispy-form/address-information/{{ system_user_id }}/edit/{{ pk }}" method="post" onsubmit="event.preventDefault();ledger_api_django_crispy_forms.submit_form(this.id,'id_create_edit_address_information')">
+        {% crispy form %}
+    </form>
+    <script>
+        $('#id_address_type').change(function() {
+            if (this.value == 'residential_address') {
+                $('#div_id_use_for_postal').show();
+                $('#div_id_use_for_billing').show();
+                $( "#id_use_for_postal" ).prop( "checked", false );
+                $( "#id_use_for_billing" ).prop( "checked", false );
+            } else {
+                $( "#id_use_for_postal" ).prop( "checked", false );
+                $( "#id_use_for_billing" ).prop( "checked", false );
+                $('#div_id_use_for_postal').hide();
+                $('#div_id_use_for_billing').hide();
+                
+            }
+            {% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.postal_address.show  is False %}
+                $("#div_id_use_for_postal").hide();
+            {% endif %}
+
+            {% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.billing_address.show  is False %}  
+                $("#div_id_use_for_billing").hide();
+            {% endif %}                 
+        }); 
+        var address_type = $('#id_address_type').val();
+        if (address_type == 'residential_address') {
+            $('#div_id_use_for_postal').show();
+            $('#div_id_use_for_billing').show();
+        } else {
+            $( "#id_use_for_postal" ).prop( "checked", false );
+            $( "#id_use_for_billing" ).prop( "checked", false );
+            $('#div_id_use_for_postal').hide();
+            $('#div_id_use_for_billing').hide();
+            
+        }
+
+
+        {% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.postal_address.show  is False %}
+            $("#div_id_use_for_postal").hide();
+        {% endif %}
+
+        {% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.billing_address.show  is False %}  
+            $("#div_id_use_for_billing").hide();
+        {% endif %}            
+    </script>
+
+    {% endif %}
+</div>
+{% endblock %}

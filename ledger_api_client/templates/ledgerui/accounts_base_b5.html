@@ -15,26 +15,22 @@
 {% endblock %}
 
 {% block  top_menu %}
-<li>
+    <li>
+      <button type="button" class="btn btn-sm btn-secondary">
+        Notification 1 <span class="badge bg-danger">14</span>
+      </button>
+    </li>
+    <li>
          <button type="button" class="btn btn-sm btn-secondary">
-                  Notification 1 <span class="badge bg-danger">14</span>
+            Notification 1 <span class="badge bg-danger">14</span>
          </button>
 
-</li>
-
-<li>
+    </li>
+    <li>
          <button type="button" class="btn btn-sm btn-secondary">
-                  Notification 1 <span class="badge bg-danger">14</span>
+            Notification 1 <span class="badge bg-danger">14</span>
          </button>
-
-</li>
-
-<li>
-         <button type="button" class="btn btn-sm btn-secondary">
-                  Notification 1 <span class="badge bg-danger">14</span>
-         </button>
-
-</li>
+    </li>
 {% endblock %}
 
 
@@ -53,6 +49,7 @@
 
 
 {% block content %}
+{% if request.session.is_authenticated %}
    <script type="text/javascript" src="/static/ledger_api/js/ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
    <input type='hidden' value='{{ csrf_token }}' id='ledger_ui_csrf_token' >
    <div class="container">
@@ -70,13 +67,11 @@
             </div>
         </div>
         {% endif %}
-	<div class="col-lg-12">
-
-		<div id='content-payment-body'>
-
-			{{ data|safe }}
-		</div>
-	</div>
+        <div class="col-lg-12">
+          <div id='content-payment-body'>            
+            {{ data|safe }}
+          </div>
+        </div>
 
 
 
@@ -84,26 +79,33 @@
             <div class="col">
                 {% block page_content_inner %}
 <br>
+
+{% block accounts_message_top %}
+{% endblock %}
+
+
+
 <nav class='pb-1'>
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
     <button class="nav-link active managed-account-nav" id="nav-details-tab" data-bs-toggle="tab" data-bs-target="#nav-details" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Details</button>
-    {% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
-        <button class="nav-link managed-account-nav " id="nav-cards-tab" data-bs-toggle="tab" data-bs-target="#nav-cards" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Manage Cards</button>
-    {% endif %}
-    {% block myaccount_nav %}
-       <button class="nav-link  managed-account-nav" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Other1</button>
-       <button class="nav-link  managed-account-nav" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Other2</button>
-    {% endblock %}
+        {% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
+            <button class="nav-link managed-account-nav " id="nav-cards-tab" data-bs-toggle="tab" data-bs-target="#nav-cards" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Manage Cards</button>
+        {% endif %}
+        {% block myaccount_nav %}
+            <button class="nav-link  managed-account-nav" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Other1</button>
+            <button class="nav-link  managed-account-nav" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Other2</button>
+        {% endblock %}
   </div>
 </nav>
 
 <div id='nav-details-tab-page'>
 {% if 'first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'dob' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+<a name="personal-details"></a>
 <div class="card" id='personal-details-card-box'>
   <div class="card-header fw-bold h4" style='padding:30px;'>
         <div class='row'>
           <div class='col-6'>
-                <i class="bi bi-check-circle-fill" style='color: #08c508;'></i>&nbsp;  Personal Details
+                <span id='personal-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp;  Personal Details
           </div>
           <div class='col-6 text-end'>
                 <i class="bi fw-bold chevron-toggle" data-bs-target="#ledger_ui_account_details-card-body"></i>
@@ -115,17 +117,17 @@
      <div id="ledger_ui_account_details"></div>
   </div>
 </div>
-
 <br>
 {% endif %}
 
 {% if 'identification' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+<a name="identification"></a>
 <div class="card">
   <div class="card-header fw-bold h4" style='padding:30px;'>
          <div class='row'>
 
           <div class='col-6'>
-                <i class="bi bi-x-circle-fill" style='color: #ff0909'></i>&nbsp;  Identification Details
+            <span id='identification-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp;  Identification Details
 
           </div>
           <div class='col-6 text-end'>
@@ -145,11 +147,12 @@
 {% endif %}
 
 {% if 'residential_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+<a name="residential-address"></a>
 <div class="card">
   <div class="card-header fw-bold h4" style='padding:30px;'> 
     <div class='row'>
 	  <div class='col-6'>
-                <i class="bi bi-check-circle-fill" style='color: #08c508;'></i>&nbsp; Address Details
+      <span id='address-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp; Address Details
 
 	  </div>
 	  <div class='col-6 text-end'>
@@ -166,12 +169,13 @@
 <br>
 {% endif %}
 
+<a name="contact-details"></a>
 <div class="card">
   <div class="card-header fw-bold h4" style='padding:30px;'>
     <div class='row'>
 
           <div class='col-6'>
-                <i class="bi bi-x-circle-fill" style='color: #ff0909'></i>&nbsp; Contact Details
+            <span id='contact-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp; Contact Details
           </div>
           <div class='col-6 text-end'>
                 <i class="bi fw-bold chevron-toggle" data-bs-target="#ledger_ui_contact-details-card-body"></i>
@@ -312,10 +316,32 @@ ledger_management.init({{ request.user.id }});
     </div>
   </div>
 </div>
-{% endif %}
-</div>
 
+
+{% endif %}
+
+{% block additional_content %}
+{% endblock %}	   
+
+	   
+{% block accounts_message_bottom %}
 {% endblock %}
+
+
+{% else %}  
+  <div class="container">
+    <BR>
+    <div class='alert alert-danger'>
+      Your are currently not logged. Please login to access this page.
+    </div>
+  </div>
+{% endif %}
+
+</div>
+{% endblock %}
+
+
+
 
 {% block page_footer %}
 <footer class="footer mt-auto py-3">

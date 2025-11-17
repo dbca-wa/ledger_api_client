@@ -1,35 +1,43 @@
+import django
+
 from django.core.exceptions import ImproperlyConfigured
-from confy import env, database
+from django.contrib import messages
+
+# from confy import env, database
+import decouple
 import sys
 import dj_database_url
 import os
+import json
 
 # Project paths
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = None
-BASE_DIR_ENV = env('BASE_DIR',None)
+BASE_DIR_ENV = decouple.config('BASE_DIR',default=None)
 if BASE_DIR_ENV is None:
    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 else:
    BASE_DIR = BASE_DIR_ENV
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'ledger')
 
-PAYMENT_OFFICERS_GROUP = env('PAYMENT_OFFICERS_GROUP','Payments Officers')
+PAYMENT_OFFICERS_GROUP = decouple.config('PAYMENT_OFFICERS_GROUP',default='Payments Officers')
 
-LEDGER_API_KEY=env('LEDGER_API_KEY',"NO_KEY_PROVIDED")
-LEDGERGW_URL=env('LEDGERGW_URL','http://localhost/')
-LEDGER_API_URL=env('LEDGER_API_URL','http://localhost/')
-LEDGER_UI_URL=env('LEDGER_UI_URL','http://localhost/')
+LEDGER_API_KEY=decouple.config('LEDGER_API_KEY',default="NO_KEY_PROVIDED")
+LEDGERGW_URL=decouple.config('LEDGERGW_URL',default='http://localhost/')
+LEDGER_API_URL=decouple.config('LEDGER_API_URL',default='http://localhost/')
+LEDGER_UI_URL=decouple.config('LEDGER_UI_URL',default='http://localhost/')
 
 # Application definitions
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG', False)
-CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE', False)
-SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE', False)
+SECRET_KEY = decouple.config('SECRET_KEY')
+DEBUG = decouple.config('DEBUG', False, cast=bool)
+CSRF_COOKIE_SECURE = decouple.config('CSRF_COOKIE_SECURE', False)
+SESSION_COOKIE_SECURE = decouple.config('SESSION_COOKIE_SECURE', False)
 if DEBUG:
     ALLOWED_HOSTS = ['*']
 else:
-    ALLOWED_HOSTS = env('ALLOWED_HOSTS', [])
+    ALLOWED_HOSTS_STRING = decouple.config("ALLOWED_HOSTS", default='[""]')
+    ALLOWED_HOSTS = json.loads(ALLOWED_HOSTS_STRING)   
+   
 WSGI_APPLICATION = 'ledger.wsgi.application'
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -74,16 +82,22 @@ AUTH_USER_MODEL = 'ledger_api_client.EmailUserRO'
 # this one prevents the email auth backend from creating EmailUsers with a username param
 USER_FIELDS = ['email']
 
-SESSION_COOKIE_DOMAIN = env('SESSION_COOKIE_DOMAIN', None)
+SESSION_COOKIE_DOMAIN = decouple.config('SESSION_COOKIE_DOMAIN', default=None)
 if SESSION_COOKIE_DOMAIN:
     SESSION_COOKIE_NAME = (SESSION_COOKIE_DOMAIN + ".ledger_sessionid").replace(".", "_")
 
 
 # Email settings
-ADMINS = ('asi@dpaw.wa.gov.au',)
-EMAIL_HOST = env('EMAIL_HOST', 'email.host')
-EMAIL_PORT = env('EMAIL_PORT', 25)
-EMAIL_FROM = env('EMAIL_FROM', ADMINS[0])
+EMAIL_HOST = decouple.config('EMAIL_HOST', default='email.host')
+EMAIL_PORT = decouple.config('EMAIL_PORT', default=25)
+
+if django.VERSION >= (3, 2):
+    ADMINS = (('ASI Notifications', 'asi@dpaw.wa.gov.au',),)
+    EMAIL_FROM = decouple.config('EMAIL_FROM', default=ADMINS[0][1])
+else:
+    ADMINS = ('asi@dpaw.wa.gov.au',)
+    EMAIL_FROM = decouple.config('EMAIL_FROM', default=ADMINS[0])
+
 DEFAULT_FROM_EMAIL = EMAIL_FROM
 
 TEMPLATES = [
@@ -147,7 +161,7 @@ DATABASE_APPS_MAPPING = {
 # Database
 DATABASES = {
     # Defined in the DATABASE_URL env variable.
-    'default': database.config(),
+    'default': dj_database_url.config(env='DATABASE_URL'),
 }
 if len(sys.argv) > 1:
     if sys.argv[1] == 'makemigrations' or sys.argv[1] == 'migrate':
@@ -201,7 +215,7 @@ STATICFILES_DIRS = [
 ]
 if not os.path.exists(os.path.join(BASE_DIR, 'media')):
     os.mkdir(os.path.join(BASE_DIR, 'media'))
-MEDIA_ROOT = env('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
+MEDIA_ROOT = decouple.config('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
 MEDIA_URL = '/media/'
 
 # Logging settings
@@ -217,7 +231,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': env('LOG_CONSOLE_LEVEL', 'INFO'),
+            'level': decouple.config('LOG_CONSOLE_LEVEL', default='INFO'),
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
@@ -232,7 +246,7 @@ LOGGING = {
     'loggers': {
         '': {
             'handlers': ['file', 'console'],
-            'level': env('LOG_CONSOLE_LEVEL', 'WARNING'),
+            'level': decouple.config('LOG_CONSOLE_LEVEL', default='WARNING'),
             'propagate': True
         },
         'django': {
@@ -272,33 +286,33 @@ LOGGING = {
 DDF_FILL_NULLABLE_FIELDS = False
 
 # Ledger settings
-CMS_URL=env('CMS_URL',None)
-VALID_SYSTEMS=env('VALID_SYSTEMS', '')
+CMS_URL=decouple.config('CMS_URL',default=None)
+VALID_SYSTEMS=decouple.config('VALID_SYSTEMS', default='')
 VALID_SYSTEMS=VALID_SYSTEMS.split(',') if VALID_SYSTEMS else []
-LEDGER_USER=env('LEDGER_USER',None)
-LEDGER_PASS=env('LEDGER_PASS')
-NOTIFICATION_EMAIL=env('NOTIFICATION_EMAIL')
-BPAY_GATEWAY = env('BPAY_GATEWAY', None)
-INVOICE_UNPAID_WARNING = env('INVOICE_UNPAID_WARNING', '')
+LEDGER_USER=decouple.config('LEDGER_USER',default=None)
+LEDGER_PASS=decouple.config('LEDGER_PASS', default=None)
+NOTIFICATION_EMAIL=decouple.config('NOTIFICATION_EMAIL', default='')
+BPAY_GATEWAY = decouple.config('BPAY_GATEWAY', default=None)
+INVOICE_UNPAID_WARNING = decouple.config('INVOICE_UNPAID_WARNING', default='')
 # GST Settings
-LEDGER_GST = env('LEDGER_GST',10)
+LEDGER_GST = decouple.config('LEDGER_GST',default=10, cast=int)
 # BPAY settings
-BPAY_ALLOWED = env('BPAY_ALLOWED',True)
-BPAY_BILLER_CODE=env('BPAY_BILLER_CODE')
+BPAY_ALLOWED = decouple.config('BPAY_ALLOWED',default=True, cast=bool)
+BPAY_BILLER_CODE=decouple.config('BPAY_BILLER_CODE', default=None)
 # BPOINT settings
 BPOINT_CURRENCY='AUD'
-BPOINT_BILLER_CODE=env('BPOINT_BILLER_CODE')
-BPOINT_USERNAME=env('BPOINT_USERNAME')
-BPOINT_PASSWORD=env('BPOINT_PASSWORD')
-BPOINT_MERCHANT_NUM=env('BPOINT_MERCHANT_NUM')
-BPOINT_TEST=env('BPOINT_TEST',True)
+BPOINT_BILLER_CODE=decouple.config('BPOINT_BILLER_CODE', default=None)
+BPOINT_USERNAME=decouple.config('BPOINT_USERNAME', default=None)
+BPOINT_PASSWORD=decouple.config('BPOINT_PASSWORD', default=None)
+BPOINT_MERCHANT_NUM=decouple.config('BPOINT_MERCHANT_NUM', default=None)
+BPOINT_TEST=decouple.config('BPOINT_TEST',default=True, cast=bool)
 # Custom Email Settings
 EMAIL_BACKEND = 'ledger_api_client.ledger_email.LedgerEmailBackend'
-PRODUCTION_EMAIL = env('PRODUCTION_EMAIL', False)
+PRODUCTION_EMAIL = decouple.config('PRODUCTION_EMAIL', default=False, cast=bool)
 # Intercept and forward email recipient for non-production instances
 # Send to list of NON_PROD_EMAIL users instead
-EMAIL_INSTANCE = env('EMAIL_INSTANCE','PROD')
-NON_PROD_EMAIL = env('NON_PROD_EMAIL')
+EMAIL_INSTANCE = decouple.config('EMAIL_INSTANCE',default='PROD')
+NON_PROD_EMAIL = decouple.config('NON_PROD_EMAIL', default=None)
 
 if not PRODUCTION_EMAIL:
     if not NON_PROD_EMAIL:
@@ -308,10 +322,17 @@ if not PRODUCTION_EMAIL:
     if EMAIL_INSTANCE == 'PROD':
         raise ImproperlyConfigured('EMAIL_INSTANCE cannot be \'PROD\' if PRODUCTION_EMAIL is set to False')
 
-PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE=env('PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE','')
-PAYMENT_INTERFACE_SYSTEM_ID=env('PAYMENT_INTERFACE_SYSTEM_ID','')
+PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE=decouple.config('PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE',default='')
+PAYMENT_INTERFACE_SYSTEM_ID=decouple.config('PAYMENT_INTERFACE_SYSTEM_ID', default='')
 SESSION_EXPIRY_SSO = 883600
-ENABLE_DJANGO_LOGIN=env('ENABLE_DJANGO_LOGIN', False)
+ENABLE_DJANGO_LOGIN=decouple.config("ENABLE_DJANGO_LOGIN", default=False, cast=bool)
+
+LEDGER_UI_ORGANISATION_MANAGEMENT = [
+        {'organisation_name': {'options' : {'view': True, 'edit': True}}},
+        {'organisation_abn': {'options' : {'view': True, 'edit': True}}},
+        {'billing_address': {'options' : {'view': True, 'edit': True}}},
+        {'postal_address': {'options' : {'view': True, 'edit': True}}}
+]
 
 LEDGER_UI_ACCOUNTS_MANAGEMENT = [
             # {'account_name': {'options' : {'view': True, 'edit': True}}},
@@ -335,8 +356,32 @@ LEDGER_UI_ACCOUNTS_MANAGEMENT = [
             {'mobile_number' : {'options' : {'view': True, 'edit': True}}},
 
 ]
+
 LEDGER_UI_CARDS_MANAGEMENT = False
 
 LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS = []
 for am in LEDGER_UI_ACCOUNTS_MANAGEMENT:
     LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS.append(list(am.keys())[0])
+
+
+LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT = {
+            'legal_details': {'options' : {"show": True}},
+            'address_details': {'options' : {'residential_address': {"show": True, "total_allowed": 1},'postal_address': {"show": True, "total_allowed": 1},'billing_address': {"show": True, "total_allowed": 1}}},
+            'contact_details': {'options' : {'show': True,}},
+}
+
+LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT_KEYS = []
+for am in LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.items():
+    LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT_KEYS.append(am[0])
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-info',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
+
+SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD=decouple.config('SYSTEM_ACCOUNT_AUTO_LOCK_PERIOD',default=86400, cast=int)
+SYSTEM_ACCOUNT_AUTO=decouple.config('SYSTEM_ACCOUNT_AUTO',default='ledger@dbca.wa.gov.au')
+ORGANISATION_PERMISSION_MODULE = None

@@ -1,6 +1,7 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.fields import CharField, DecimalField
-from django.utils import six
+# from django.utils import six
+from django5_six.utils import six
 #from django.utils.translation import ugettext_lazy as _
 
 class Creator(object):

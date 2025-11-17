@@ -4,7 +4,9 @@ from django.conf import settings
 from decimal import Decimal
 import django
 import requests
-import json 
+import json
+import base64
+import mimetypes
 from decimal import InvalidOperation
 from babel.numbers import format_currency
 from django.utils.translation import get_language, to_locale
@@ -188,7 +190,7 @@ def process_api_refund(request, basket_parameters, customer_id, return_url, retu
     try:
         # send request to server to get file
         resp = requests.post(url, data = myobj, cookies=cookies)
-        print ("REFUND RES")
+        print ("Refund Response")
         print (resp.text)
 
     except Exception as e:
@@ -513,6 +515,13 @@ def calculate_excl_gst(amount):
     result = (Decimal(100.0) / Decimal(100 + settings.LEDGER_GST) * Decimal(amount)).quantize(TWELVEPLACES)
     return result
 
+def format_currency(amount, currency_symbol="$"):
+    try:
+        amount = float(amount)  # Ensure the input is a number
+        return f"{currency_symbol}{amount:,.2f}"
+    except ValueError:
+        return "Invalid input: Please provide a numerical value."
+
 #@register.filter(name='currency')
 def currency(value, currency=None):
     """
@@ -546,8 +555,13 @@ def get_system_group_user_by_name(system_group_name):
         system_groups = managed_models.SystemGroup.objects.filter(name=system_group_name)
         for sg in system_groups:
             for u in managed_models.SystemGroupPermission.objects.filter(system_group=sg,active=True):
-                permission_list.append({"id":u.id, "emailuser_id" : u.emailuser.id,})
-                cache.set(cache_name_pl,json.dumps(permission_list), 86400)
+                try:
+                    if u.emailuser:
+                        permission_list.append({"id":u.id, "emailuser_id" : u.emailuser.id,})
+                except Exception as e:
+                    print ("u.emailuser exception: possible check the user id exists")
+                    print (e)
+            cache.set(cache_name_pl,json.dumps(permission_list), 86400)
     else:
         permission_list = json.loads(pl_cache)
 
@@ -576,7 +590,7 @@ class FakeRequestSessionObj():
          return ''
 
 
-def process_create_future_invoice(basket_id, invoice_text, return_preload_url):
+def process_create_future_invoice(basket_id=None, invoice_text=None, return_preload_url=None, invoice_name=None, due_date=None):
     jsondata = {'status': 404, 'message': 'API Key Not Found'}
     ledger_user_json  = {}
     context = {}
@@ -584,14 +598,132 @@ def process_create_future_invoice(basket_id, invoice_text, return_preload_url):
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/process_create_future_invoice/'+api_key+'/'
     api_key = settings.LEDGER_API_KEY
-    myobj = {'basket_id': basket_id, 'invoice_text': invoice_text, 'return_preload_url' : return_preload_url}
+    myobj = {'basket_id': basket_id, 'invoice_text': invoice_text, 'return_preload_url' : return_preload_url, 'invoice_name': invoice_name, 'due_date': due_date}
     resp = ""
     try:
         api_resp = requests.post(url, data = myobj, cookies=cookies)
-       
+        
         resp = api_resp.json()
     except Exception as e:
         print (e)
         resp = {"error" : "ERROR Attempting to connect payment gateway please try again later"}
     return resp
+
+def update_ledger_oracle_invoice(ledger_invoice_number, oracle_invoice_number, oracle_invoice_file_local):
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    context = {}
+    cookies = {}
+
+    extension = None
+    if oracle_invoice_file_local[-4:-3] == '.':
+        extension  = oracle_invoice_file_local[-3:]
+    elif oracle_invoice_file_local[-5:-4] == '.':
+        extension  = oracle_invoice_file_local[-4:]
+
+    # Python Convert PDF to Base64 String
+    with open(oracle_invoice_file_local, "rb") as OracleInvoiceFile:
+        oracle_invoice_file_base64 = base64.b64encode(OracleInvoiceFile.read())    
+    
+    oifb64_url  = "data:"+mimetypes.types_map['.'+str(extension.lower())]+";base64,"+oracle_invoice_file_base64.decode("ascii")
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/update_ledger_oracle_invoice/'+api_key+'/'
+    api_key = settings.LEDGER_API_KEY
+    
+    myobj = {'ledger_invoice_number': ledger_invoice_number, 'oracle_invoice_number': oracle_invoice_number, 'oracle_invoice_file_base64' : oifb64_url, 'extension': extension,}
+    resp = ""
+    try:
+        api_resp = requests.post(url, data = myobj, cookies=cookies)        
+        resp = api_resp.json()        
+    except Exception as e:
+        print (e)
+        resp = {"error" : "ERROR Attempting to connect payment gateway please try again later"}
+    return resp
+
+
+
+def get_ledger_totals():
+    ledger_totals = {"total_failed": 0}
+    try: 
+       data_file = settings.BASE_DIR+"/datasets/ledger-totals.json"
+       f = open(settings.BASE_DIR+"/datasets/ledger-totals.json", "r")
+       dumped_data = f.read()
+       f.close()
+       ledger_import_totals = json.loads(dumped_data)
+       ledger_totals["total_failed"] = ledger_import_totals['refund_total']
+    except:
+       print ("error opening ledger totals")
+
+    return ledger_totals
+
+
+def remove_html_tags(text):
+    
+    if text is None:
+        return None
+
+    HTML_TAGS_WRAPPED = re.compile(r'<[^>]+>.+</[^>]+>')
+    HTML_TAGS_NO_WRAPPED = re.compile(r'<[^>]+>')
+
+    text = HTML_TAGS_WRAPPED.sub('', text)
+    text = HTML_TAGS_NO_WRAPPED.sub('', text)
+    return text
+
+def cancel_invoice(invoice_id):
+    """
+    Cancel an invoice by its ID.
+    """
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/cancel-invoice/'+api_key+'/'
+    myobj = {'invoice_reference': invoice_id}
+    cookies = {}
+    resp = requests.post(url, data=myobj, cookies=cookies)
+    
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except Exception as e:        
+        resp_json = {}
+        print (e)
+        print (resp.text)
+    return resp_json
+    
+def change_user_invoice_ownership(current_email,new_email):
+    """
+    Cancel an invoice by its ID.
+    """
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/change-user-invoice-ownership/'+api_key+'/'
+    myobj = {'current_email': current_email, 'new_email': new_email}
+    cookies = {}
+    resp = requests.post(url, data=myobj, cookies=cookies)
+    
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except Exception as e:
+        print (e)
+        print (resp.text)
+        resp_json = {}
+    return resp_json
+
+
+def check_oracle_code(oracle_code):
+    """
+    Cancel an invoice by its ID.
+    """
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/check-oracle-code/'+api_key+'/'
+    myobj = {'oracle_code': oracle_code,}
+    cookies = {}
+    resp = requests.post(url, data=myobj, cookies=cookies)
+    
+    resp_json = {}
+    try:
+        resp_json = resp.json()
+    except Exception as e:
+        print (e)
+        print (resp.text)
+        resp_json = {}
+    return resp_json
 

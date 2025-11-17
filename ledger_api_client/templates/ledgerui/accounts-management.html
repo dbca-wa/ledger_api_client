@@ -1,0 +1,162 @@
+{% extends "webtemplate_dbca/base_b5.html" %}
+
+{% block header_top_menu %}
+
+{% endblock %}
+
+
+{% block  top_menu %}
+    <li>
+      <button type="button" class="btn btn-sm btn-secondary">
+        Notification 1 <span class="badge bg-danger">14</span>
+      </button>
+    </li>
+    <li>
+         <button type="button" class="btn btn-sm btn-secondary">
+            Notification 1 <span class="badge bg-danger">14</span>
+         </button>
+
+    </li>
+    <li>
+         <button type="button" class="btn btn-sm btn-secondary">
+            Notification 1 <span class="badge bg-danger">14</span>
+         </button>
+    </li>
+{% endblock %}
+
+
+{% block menubottom %}
+{%endblock %}
+
+
+{% block extra_style %}
+<style>
+    .footer {background-color: lightgrey}
+</style>
+{% endblock %}
+
+{% block menu_spacer %}
+{% endblock %}
+
+{% block content %}
+
+<link href="/static/ledger_api_client_node_modules/node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css?ver={{ settings.GIT_COMMIT_HASH }}" rel="stylesheet"/>
+
+<script  type="text/javascript" src="/static/ledger_api_client_node_modules/node_modules/jquery/dist/jquery.min.js?ver={{ settings.GIT_COMMIT_HASH }}"></script>
+<script  type="text/javascript" src="/static/ledger_api_client_node_modules/node_modules/moment/min/moment.min.js?ver={{ settings.GIT_COMMIT_HASH }}"></script>
+<script  type="text/javascript" src="/static/ledger_api_client_node_modules/node_modules/datatables.net/js/dataTables.min.js?ver={{ settings.GIT_COMMIT_HASH }}"></script>
+<script  type="text/javascript" src="/static/ledger_api_client_node_modules/node_modules/datatables.net-bs5/js/dataTables.bootstrap5.min.js?ver={{ settings.GIT_COMMIT_HASH }}"></script>
+
+<BR>
+
+<div class='container'>
+<div class="card">
+  <h2 class="card-header">Account Management</h2>
+  <div class="card-body">
+<div class="row">
+
+
+
+		        <div class="col-12">
+			                                <BR>
+                                        <div class='row'>
+                                        <div class='col-6'>
+                                        <div class="form-check">
+                                          <input class="form-check-input" type="checkbox"  id="active_users" value="" checked >
+                                          <label class="form-check-label" for="active_users">
+                                            Active Users
+                                          </label>
+                                        </div>
+                                      </div>
+                                        <div class='col-6 text-end'>
+                                             <A href='/ledger-ui/accounts-management/add' class='btn btn-primary'>Add Account</a>
+                                        </div>
+                                      </div>
+
+                             <table cellspacing="0" width="100%" id="account-management-table" name="account-management-table" class="hover table table-striped table-bordered dt-responsive nowrap dataTable no-footer dtr-inline" ffrole="grid"> 
+                             <thead>
+                                     <tr>
+                                       <th>Ledger ID</th>
+                                       <th>Account Name</th>
+                                       <th>Legal Name</th>                                       
+                                       <th>Legal DOB</th>
+                                       <th>Email</th>
+                                       <th>Action</th>
+
+                                     </tr>
+                             </thead>
+                             <tbody>
+           
+                             </tbody>
+                             </table>
+
+	    </div>
+
+            </div>
+          </div>
+</div>
+</div>
+</div>
+<style>
+
+div.dt-processing div:last-child {
+    display: none;
+}
+</style>
+</body>
+
+<script>
+
+ var account_table = new DataTable('#account-management-table', {
+  "processing": true,
+  "searching": true,
+  "language": {        
+        "infoFiltered": "",
+        "processing": "<div style='font-weight:bold;'>Loading. Please wait...<BR><BR></div><div class='spinner-border text-primary' style='width: 3rem; height: 3rem;' role='status'><span class='visually-hidden'>Loading...</span></div><div><BR></div>"
+    },  
+    order: [[0, 'desc']],
+    columnDefs:    [
+      { className: "dt-head-left", targets: "_all" },
+      { className: "dt-head-left", targets: [5,],  "orderable": false },
+  
+  ],
+  "columns": [
+      { "data": "id"},
+      
+      { "data": "account_name"},
+      { "data": "legal_name"},      
+      { "data": "legal_dob"},
+      { "data": "email"},
+      { "data": "action"},
+  ],
+  "serverSide": true,
+  dataSrc: function (json) {
+    var data = JSON.parse(json.d);
+    console.log(data);
+  
+    return data.data;
+  }, 
+  "ajax": {
+      cache: false,
+      url: "/ledger-admin-api/accounts-management/list",
+      type: "POST",
+      data: function (data) {
+         data['active'] = $("#active_users").prop("checked");
+         return JSON.stringify(data);
+      },
+      
+      dataType: "json",
+      contentType: "application/json;charset=UTF-8",      
+      error: function () {
+          console.log("Error Loading Rest API");
+      },      
+  },
+} )
+
+$('#active_users').click(function() {
+  account_table.ajax.reload();
+});
+</script>
+
+
+{% endblock %}

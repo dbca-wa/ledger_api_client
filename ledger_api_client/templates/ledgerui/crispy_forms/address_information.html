@@ -1,0 +1,137 @@
+{% block page_content_inner %}
+
+
+<div class='col-12 text-end'><a id='add_address_btn' class='btn btn-sm btn-primary'>Add Address</a></div></div>
+
+{% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.residential_address.show  is True %}
+<div class="ms-1 mb-1 me-1 row "><div class='col-8 text-start'><h6>Residential Address</h6></div><div class='col-4 text-end'></div></div> 
+    <div class="row mx-md-n5 border p-2 ms-3 me-3 mb-3">      
+        <div class='row'>   
+        {% if sua_residential_count > 0 %} 
+            <div class='col-3 fw-bolder'>Street</div>
+            <div class='col-2 fw-bolder'>Locality</div>
+            <div class='col-1 fw-bolder'>State</div>
+            <div class='col-2 fw-bolder'>Postcode</div>
+            <div class='col-2 fw-bolder'>Country</div>
+            <div class='col-2 fw-bolder'></div>        
+            {% for sua in system_user_address %} 
+                {% if sua.address_type == 'residential_address' %}
+                    <div class='col-3'>{{ sua.line1 }}</div>
+                    <div class='col-2'>{{ sua.locality }}</div>
+                    <div class='col-1'>{{ sua.state }}</div>
+                    <div class='col-2'>{{ sua.postcode }}</div>
+                    <div class='col-2'>{{ sua.country }}</div>
+                    <div class='col-2 text-end p-1'>
+                        <button class='edit-address btn btn-sm btn-primary' data-id="{{ sua.id }}">Edit</button>
+                        <button class='delete-address btn btn-sm btn-danger' data-id="{{ sua.id }}">Delete</button>
+                    </div>                     
+                    
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class='col-12'>No Address Information</div>
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.postal_address.show  is True %}
+<div class="ms-1 mb-1 me-1 row "><div class='col-8 text-start'><h6>Postal Address</h6></div><div class='col-4 text-end'></div></div> 
+    <div class="row mx-md-n5 border p-2 ms-3 me-3 mb-3">          
+        <div class='row'>         
+            {% if sua_postal_count > 0 %} 
+            <div class='col-3 fw-bolder'>Street</div>
+            <div class='col-2 fw-bolder'>Locality</div>
+            <div class='col-1 fw-bolder'>State</div>
+            <div class='col-2 fw-bolder'>Postcode</div>
+            <div class='col-2 fw-bolder'>Country</div>
+            <div class='col-2 fw-bolder'></div>                
+                {% for sua in system_user_address %} 
+                    {% if sua.address_type == 'postal_address' %}                   
+                        <div class='col-3'>{{ sua.line1 }}</div>
+                        <div class='col-2'>{{ sua.locality }}</div>
+                        <div class='col-1'>{{ sua.state }}</div>
+                        <div class='col-2'>{{ sua.postcode }}</div>
+                        <div class='col-2'>{{ sua.country }}</div>       
+                        <div class='col-2 text-end p-1'>                            
+                            {% if sua.system_address_link > 0 %}
+                            {% else %}                            
+                                <button class='edit-address btn btn-sm btn-primary' data-id="{{ sua.id }}">Edit</button>
+                                <button class='delete-address btn btn-sm btn-danger' data-id="{{ sua.id }}">Delete</button>
+                            {% endif %}
+                        </div>                                                
+                    {% endif %}
+                {% endfor %}  
+            {% else %}
+                <div class='col-12'>No Address Information</div>
+            {% endif %}                      
+        </div>
+    </div>
+</div>     
+{% endif %}   
+
+{% if settings.LEDGER_UI_SYSTEM_ACCOUNTS_MANAGEMENT.address_details.options.billing_address.show  is True %}
+<div class="ms-1 mb-1 me-1 row "><div class='col-8 text-start'><h6>Billing Address</h6></div><div class='col-4 text-end'></div></div> 
+    <div class="row mx-md-n5 border p-2 ms-3 me-3 mb-3">                          
+        <div class='row'>  
+            {% if sua_billing_count > 0 %}        
+            <div class='col-3 fw-bolder'>Street</div>
+            <div class='col-2 fw-bolder'>Locality</div>
+            <div class='col-1 fw-bolder'>State</div>
+            <div class='col-2 fw-bolder'>Postcode</div>
+            <div class='col-2 fw-bolder'>Country</div>
+            <div class='col-2 fw-bolder'></div>    
+                {% for sua in system_user_address %} 
+                    {% if sua.address_type == 'billing_address' %}                    
+                        <div class='col-3'>{{ sua.line1 }}</div>
+                        <div class='col-2'>{{ sua.locality }}</div>
+                        <div class='col-1'>{{ sua.state }}</div>
+                        <div class='col-2'>{{ sua.postcode }}</div>
+                        <div class='col-2'>{{ sua.country }}</div>                    
+                        <div class='col-2 text-end p-1'>                            
+                            {% if sua.system_address_link > 0 %}
+                            {% else %}
+                                <button class='edit-address btn btn-sm btn-primary' data-id="{{ sua.id }}">Edit</button>
+                                <button class='delete-address btn btn-sm btn-danger' data-id="{{ sua.id }}">Delete</button>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}            
+            {% else %}
+                <div class='col-12'>No Address Information</div>
+            {% endif %}   
+        </div>
+    </div>    
+</div>
+{% endif  %}
+
+<script>
+    if ('{{ address_details_completed }}' == 'True') { 
+        $('#address-details-status').html('<i class="bi bi-check-circle-fill" style="color: #08c508;"></i>');
+    } else {
+        $('#address-details-status').html('<i class="bi bi-x-circle-fill" style="color: #ff0909"></i>');  
+    }            
+    $('#add_address_btn').on('click', function() {         
+        $('#id_create_edit_address_information_modal').modal('show');
+        $('#AddressModalLabel').html("Create Address");
+        system_ledger_management.load_address_create();
+    });
+
+    $('.edit-address').on('click', function() {           
+        var address_id = $(this).data('id');
+        $('#AddressModalLabel').html("Edit Address");
+        $('#id_create_edit_address_information_modal').modal('show');
+        system_ledger_management.load_address_edit(address_id);
+    });
+
+    $('.delete-address').on('click', function() {   
+        var address_id = $(this).data('id');
+        $('#AddressModalLabel').html("Delete Address");   
+        $('#id_create_edit_address_information_modal').modal('show');
+        system_ledger_management.load_address_delete(address_id);             
+    });
+    
+    
+</script>
+{% endblock %}

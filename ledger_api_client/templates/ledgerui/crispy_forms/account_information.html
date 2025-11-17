@@ -1,0 +1,40 @@
+{% block page_content_inner %}
+
+<div class="ms-3 mb-1 me-3 "><h6>Account Details</h6></div> 
+<div class="row mx-md-n5 border p-2 ms-3 me-3 mb-3">  
+    
+           <div class='col-xs-12 col-sm-4 col-md-3 col-lg-2 text-start p-2'>
+           </div>
+           <div class='col-xs-12 col-sm-8 col-md-6 col-lg-6 p-2'>
+           <div class='fw-bold'>To update your account name or MFA(Multi-Factor Authentication) please <a href='/sso/setting'>click here</a>:</div>
+           <div><small><i>Changes will not update until your next login.</i></small></div>
+           </div>
+           <div class='col-4  p-2'>
+             </span>
+           </div>
+           <div class='col-xs-12 col-sm-4 col-md-3 col-lg-2 text-start p-2'>
+                     <label for='input-ledger-ui-given-name' class='col-form-label fw-bold'>Given name(s)</label>
+                   </div>
+                   <div class='col-xs-12 col-sm-8 col-md-6 col-lg-6 p-2'>
+                     <span id='input-ledger-ui-given-name' class='form-control' style='background-color:#efefef; height: 37px;' >{{ system_user.first_name }}<span>
+                   </div>
+                   <div class='col-4  p-2'>
+                       <span id='moreinfoInline' class='form-text'>
+                         
+                     </span>
+                   </div>
+
+                   <div class='col-xs-12 col-sm-4 col-md-3 col-lg-2 text-start p-2'>
+                     <label for='input-ledger-ui-last-name' class='col-form-label fw-bold'>Surname</label>
+                   </div>
+                   <div class='col-xs-12 col-sm-8 col-md-6 col-lg-65 p-2'>
+                     <span type='input' id='input-ledger-ui-last-name' class='form-control' style='background-color:#efefef; height: 37px;' >{{ system_user.last_name }}<span>
+            </div>
+            <div class='col-4 p-2'>
+            <span id='lineInline' class='form-text'>
+            </span>
+            </div>
+
+    
+</div>
+{% endblock %}

@@ -1,9 +1,12 @@
 from __future__ import unicode_literals
 import traceback
+import os
+from datetime import datetime, date
 from django.db import models, transaction
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField, IntegerRangeField
+# from django.contrib.postgres.fields import JSONField, IntegerRangeField
+from django.db.models import JSONField
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser #PermissionsMixin
 from django.utils import timezone
 from django.db import models
@@ -36,17 +39,18 @@ from django.core.exceptions import ValidationError
 class LedgerDBRouter(object):
 
     def db_for_read(self, model, **hints):
-       if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket' or model._meta.db_table == 'accounts_emailuser_user_permissions':
-           return 'ledger_db'
-       if model._meta.db_table == 'auth_group': #or model._meta.db_table == 'auth_permission':
-           return 'ledger_db'
+         
+        if model._meta.db_table == 'accounts_emailuser' or model._meta.db_table == 'address_country' or  model._meta.db_table == 'payments_invoice' or model._meta.db_table == 'accounts_emailuser_documents' or model._meta.db_table ==  'accounts_document'  or model._meta.db_table ==  'accounts_emailidentity' or model._meta.db_table == 'basket_basket' or model._meta.db_table == 'accounts_emailuser_user_permissions' or model._meta.db_table == 'accounts_address' or model._meta.db_table == 'accounts_emailuser_groups':
+            return 'ledger_db'
+        if model._meta.db_table == 'auth_group': #or model._meta.db_table == 'auth_permission':
+            return 'ledger_db'
 
-       if model._meta.db_table == 'django_migrations':
-            return 'default'
-           
+        if model._meta.db_table == 'django_migrations':
+                return 'default'
+        
 
-       #or model._meta.db_table == 'django_admin_log'
-       return None
+        #or model._meta.db_table == 'django_admin_log'
+        return 'default'
 
     def db_for_write(self, model, **hints):
         """
@@ -54,7 +58,7 @@ class LedgerDBRouter(object):
         """
         if model._meta.db_table == 'accounts_emailuser': # or model._meta.db_table == 'auth_group' or model._meta.db_table == 'auth_permission':
            return 'ledger_db'
-        return None
+        return 'default'
 
     def allow_relation(self, obj1, obj2, **hints):
         """
@@ -62,6 +66,8 @@ class LedgerDBRouter(object):
         """
         if 'accounts_emailuser' == obj1._meta.db_table and  'parkstay_campgroundgroup_members' == obj2._meta.db_table:
              return True
+        if 'accounts_emailuser' == obj1._meta.db_table and  'ledger_api_client_systemuser' == obj2._meta.db_table:            
+            return True
         if 'accounts_emailuser' == obj1._meta.db_table:
             return True
         if 'auth_group' == obj1._meta.db_table:
@@ -69,7 +75,7 @@ class LedgerDBRouter(object):
         if 'auth_permission' == obj1._meta.db_table:
             return True
         if 'django_content_type' == obj1._meta.db_table:
-            return True
+            return True            
         return None
 
 
@@ -187,35 +193,35 @@ class BaseAddress(models.Model):
     #               self.state, str(self.country.name), self.postcode])
     #    self.search_text = ' '.join(search_fields)
 
-    #@property
-    #def summary(self):
-    #    """Returns a single string summary of the address, separating fields
-    #    using commas.
-    #    """
-    #    return u', '.join(self.active_address_fields())
+    @property
+    def summary(self):
+       """Returns a single string summary of the address, separating fields
+       using commas.
+       """
+       return u', '.join(self.active_address_fields())
 
 
     ## Helper methods
-    #def active_address_fields(self):
-    #    """Return the non-empty components of the address.
-    #    """
-    #    fields = [self.line1, self.line2, self.line3,
-    #              self.locality, self.state, self.country, self.postcode]
-    #    #for f in fields:
-    #    #    print unicode(f).encode('utf-8').decode('unicode-escape').strip()
-    #    #fields = [str(f).strip() for f in fields if f]
-    #    print ("ENCODIUNG")
-    #    for f in fields:
-    #        print (f)
-    #        if f:
-    #            print (str(f))
-    #    print ("END ")
-    #    #print ([f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f])
-    #    fields = [str(f) for f in fields if f]
-    #    #fields = [f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
-    #    #fields = [unicode_compatible(f).encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
+    def active_address_fields(self):
+       """Return the non-empty components of the address.
+       """
+       fields = [self.line1, self.line2, self.line3,
+                 self.locality, self.state, self.country, self.postcode]
+       #for f in fields:
+       #    print unicode(f).encode('utf-8').decode('unicode-escape').strip()
+       #fields = [str(f).strip() for f in fields if f]
+       
+       for f in fields:
+           print (f)
+           if f:
+               print (str(f))
+       
+       #print ([f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f])
+       fields = [str(f) for f in fields if f]
+       #fields = [f.encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
+       #fields = [unicode_compatible(f).encode('utf-8').decode('unicode-escape').strip() for f in fields if f]
 
-    #    return fields
+       return fields
 
     #def join_fields(self, fields, separator=u', '):
     #    """Join a sequence of fields using the specified separator.
@@ -365,6 +371,7 @@ class PermissionsMixinRO(models.Model):
         else:
             sgp_groups = json.loads(sgp_cache)
         return sgp_groups
+
     def system_group_permision_list(self,system_group_id):
         from ledger_api_client import managed_models
         permission_list = []
@@ -377,7 +384,7 @@ class PermissionsMixinRO(models.Model):
                     perm_name = p.content_type.app_label+"."+p.codename
                     app_label = p.content_type.app_label
                     permission_list.append({"id":p.id, "perm_name" : perm_name, 'app_label': app_label})
-                    cache.set(cache_name_pl,json.dumps(permission_list), 86400)
+                cache.set(cache_name_pl,json.dumps(permission_list), 86400)
         else:
             permission_list = json.loads(pl_cache)
 
@@ -594,6 +601,8 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
     email = models.EmailField(unique=True, blank=False)
     first_name = models.CharField(max_length=128, blank=False, verbose_name='Given name(s)')
     last_name = models.CharField(max_length=128, blank=False)
+    legal_first_name = models.CharField(max_length=128, null=True, blank=True, verbose_name='Legal Given name(s)')
+    legal_last_name = models.CharField(max_length=128, null=True, blank=True)
     is_staff = models.BooleanField(
         default=False,
         help_text='Designates whether the user can log into the admin site.',
@@ -616,6 +625,8 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
                              verbose_name='title', help_text='')
     dob = models.DateField(auto_now=False, auto_now_add=False, null=True, blank=False,
                            verbose_name="date of birth", help_text='')
+    legal_dob = models.DateField(auto_now=False, auto_now_add=False, null=True, blank=True,
+                           verbose_name="Legal date of birth", help_text='')
     phone_number = models.CharField(max_length=50, null=True, blank=True,
                                     verbose_name="phone number", help_text='')
     position_title = models.CharField(max_length=100, null=True, blank=True,
@@ -629,9 +640,9 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
 
     residential_address = models.ForeignKey(Address, null=True, blank=False, related_name='+', on_delete=models.DO_NOTHING)
     postal_address = models.ForeignKey(Address, null=True, blank=True, related_name='+', on_delete=models.DO_NOTHING)
-    postal_same_as_residential = models.NullBooleanField(default=False) 
+    postal_same_as_residential = models.BooleanField(default=False, null=True, blank=True) 
     billing_address = models.ForeignKey(Address, null=True, blank=True, related_name='+', on_delete=models.DO_NOTHING)
-    billing_same_as_residential = models.NullBooleanField(default=False)
+    billing_same_as_residential = models.BooleanField(default=False, null=True, blank=True)
 
     identification = models.ForeignKey(Document, null=True, blank=True, on_delete=models.SET_NULL, related_name='identification_document')
     identification2 = models.ForeignKey(PrivateDocument, null=True, blank=True, on_delete=models.SET_NULL, related_name='identification_document_2')
@@ -737,6 +748,9 @@ class EmailUserRO(AbstractBaseUser, PermissionsMixinRO):
         dob is after 30 June 1959 and age is 65 or older
         :return:
         """
+        if not self.dob:
+            return False
+
         return \
             self.dob < date(1955, 7, 1) or \
             ((date(1955, 7, 1) <= self.dob <= date(1956, 6, 30)) and self.age() >= 61) or \
@@ -888,4 +902,14 @@ class Basket(models.Model):
        managed = False
        db_table = 'basket_basket'
 
+class UsersInGroup(models.Model):
+    id = models.IntegerField(primary_key=True)
+    emailuser_id = models.IntegerField(default=None, blank=True, null=True)
+    group_id = models.IntegerField(default=None, blank=True, null=True)    
 
+    def __str__(self):
+        return str(self.group_id)
+
+    class Meta:
+        managed = False
+        db_table = 'accounts_emailuser_groups'

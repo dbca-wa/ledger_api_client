@@ -1,0 +1,377 @@
+{% extends "webtemplate_dbca/base_b5.html" %}
+
+{% block header_top_menu %}
+<div id='ledger-payment-overtop'></div>
+{% endblock %}
+
+{% block extra_js %}
+     <script src="/static/common/node_modules/bootstrap-datepicker/js/bootstrap-datepicker.js?ver={{ GIT_COMMIT_HASH }}"></script>
+{% endblock %}
+
+{% block extra_css %}
+     <link type="text/css" href="/static/common/node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css?ver={{ GIT_COMMIT_HASH }}" rel="stylesheet">
+     <link rel="stylesheet" type="text/css" href="/static/common_addons/node_modules/daterangepicker/daterangepicker.css?ver={{ GIT_COMMIT_HASH }}" />
+     <link rel="stylesheet" type="text/css" href="/static/ledger_api/ledger_api.css?ver={{ GIT_COMMIT_HASH }}" />
+{% endblock %}
+
+{% block  top_menu %}
+    <li>
+      <button type="button" class="btn btn-sm btn-secondary">
+        Notification 1 <span class="badge bg-danger">14</span>
+      </button>
+    </li>
+    <li>
+         <button type="button" class="btn btn-sm btn-secondary">
+            Notification 1 <span class="badge bg-danger">14</span>
+         </button>
+
+    </li>
+    <li>
+         <button type="button" class="btn btn-sm btn-secondary">
+            Notification 1 <span class="badge bg-danger">14</span>
+         </button>
+    </li>
+{% endblock %}
+
+
+{% block menubottom %}
+{%endblock %}
+
+
+{% block extra_style %}
+<style>
+    .footer {background-color: lightgrey}
+</style>
+{% endblock %}
+
+{% block menu_spacer %}
+{% endblock %}
+
+
+{% block content %}
+
+{% if request.session.is_authenticated %}
+
+   <input type='hidden' value='{{ csrf_token }}' id='ledger_ui_csrf_token' >
+   <div class="container">
+    <div class="">
+
+        <!-- Messages  -->
+        {% if messages %}
+        <div class="row">
+            <div class="col">
+                {% for message in messages %}
+                <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
+                    {{ message|safe }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-lg-12">
+          <div id='content-payment-body'>            
+            {{ data|safe }}
+          </div>
+        </div>
+
+
+
+        <div class="row">
+            <div class="col">
+                {% block page_content_inner %}
+<br>
+
+{% block accounts_message_top %}
+{% endblock %}
+
+
+
+<nav class='pb-1'>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <button class="nav-link active managed-account-nav" id="nav-details-tab" data-bs-toggle="tab" data-bs-target="#nav-details" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Details</button>
+        {% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
+            <button class="nav-link managed-account-nav " id="nav-cards-tab" data-bs-toggle="tab" data-bs-target="#nav-cards" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Manage Cards</button>
+        {% endif %}
+        {% block myaccount_nav %}
+            <button class="nav-link  managed-account-nav" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Other1</button>
+            <button class="nav-link  managed-account-nav" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Other2</button>
+        {% endblock %}
+  </div>
+</nav>
+
+<div id='nav-details-tab-page'>
+{% if 'first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_first_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS  or 'legal_last_name' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'dob' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+<div class="card" id='personal-details-card-box'>
+  <div class="card-header fw-bold h4" style='padding:30px;'>
+        <div class='row'>
+          <div class='col-6'>
+                <span id='personal-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp;  Personal Details
+          </div>
+          <div class='col-6 text-end'>
+                <i class="bi fw-bold chevron-toggle" data-bs-target="#ledger_ui_account_details-card-body"></i>
+          </div>
+       </div>
+
+  </div>
+  <div class="card-body collapse show" id='ledger_ui_account_details-card-body'>
+     <div id="ledger_ui_account_details"></div>
+     <div id="ledger_ui_personal_details"></div>
+  </div>
+</div>
+<br>
+{% endif %}
+
+{% if 'identification' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+<div class="card">
+  <div class="card-header fw-bold h4" style='padding:30px;'>
+         <div class='row'>
+
+          <div class='col-6'>
+            <span id='identification-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp;  Identification Details
+
+          </div>
+          <div class='col-6 text-end'>
+		<i class="bi fw-bold chevron-toggle" data-bs-target="#ledger_ui_identification-card-body"></i>
+          </div>
+       </div>
+  </div>
+  <div class="card-body collapse" id='ledger_ui_identification-card-body'>
+     <div id="ledger_ui_identification_details"></div>
+  </div>
+</div>
+
+<br>
+{% endif %}
+
+{% if 'residential_line1' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'residential_locality' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'residential_state' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'residential_postcode' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'residential_country' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_line1' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_locality' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_state' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_postcode' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_country' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+{% endif %}
+
+{% if 'residential_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS or 'postal_address' in settings.LEDGER_UI_ACCOUNTS_MANAGEMENT_KEYS %}
+<div class="card">
+  <div class="card-header fw-bold h4" style='padding:30px;'> 
+    <div class='row'>
+	  <div class='col-6'>
+      <span id='address-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp; Address Details
+
+	  </div>
+	  <div class='col-6 text-end'>
+		<i class="bi fw-bold down-chevron-close chevron-toggle" data-bs-target="#ledger_ui_address-card-body"></i>
+	  </div>
+    </div>
+  </div>
+  <div class="card-body" id='ledger_ui_address-card-body'>
+     <div id="ledger_ui_address_details"></div>     
+  </div>
+</div>
+
+<br>
+{% endif %}
+
+<div class="card">
+  <div class="card-header fw-bold h4" style='padding:30px;'>
+    <div class='row'>
+
+          <div class='col-6'>
+            <span id='contact-details-status'><i class="bi bi-x-circle-fill" style='color: #ff0909'></i></span>&nbsp; Contact Details
+          </div>
+          <div class='col-6 text-end'>
+                <i class="bi fw-bold chevron-toggle" data-bs-target="#ledger_ui_contact-details-card-body"></i>
+          </div>
+      </div>
+  </div>
+  <div class="card-body" id='ledger_ui_contact-details-card-body'>
+     <div id="ledger_ui_contact_details"></div>
+
+  </div>
+</div>
+
+
+		{% endblock %}
+            </div>
+        </div>
+    </div>
+   </div>
+
+{% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
+
+<div class="modal fade" id="AddNewCardModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
+            <div id="ledger_ui_add_card_message"></div>
+            <div class="clearfix">
+              <img src="/static/payments/img/visa-mastercard-2021.png">
+            </div>
+            <div class='col-9'>
+              <div class="form-group ">  
+                <label for="id_number" class=" control-label required">
+                    Card number
+                </label>
+                <div class="">
+                      <input type="text" name="number" autocomplete="off" maxlength="20" class="form-control" required="" id="id_number">
+                </div>  
+                </div>
+            </div>
+            <div class='col-9'>
+              <div class="form-group ">                
+                <label for="id_expiry_month" class=" control-label required">
+                    Valid to
+                </label>        
+                <div class="">              
+                  <select name="expiry_month_0" class="form-control" required="" id="id_expiry_month_0"><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10" selected="">10</option><option value="11">11</option><option value="12">12</option></select><select name="expiry_month_1" class="form-control" required="" id="id_expiry_month_1"><option value="2022" selected="">2022</option><option value="2023">2023</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option><option value="2029">2029</option><option value="2030">2030</option><option value="2031">2031</option></select>                   
+                </div>    
+              </div>
+            </div>
+
+            <div class='col-9'>
+              <div class="form-group ">
+                <label for="id_ccv" class=" control-label required">
+                    CCV number
+                </label>
+                <div class="">
+                    <input type="text" name="ccv" size="5" class="form-control" required="" id="id_ccv">
+                    <span class="help-block">                      
+                          This is the 3 or 4 digit security number on the back of your bankcard
+                    </span>
+                </div>    
+              </div>
+            </div>
+            <div class='col-9'> 
+                  <button class='btn btn-primary' id='save-card-button'>Save Card</button> <span id='save_card_loader'></span>
+            </div>       
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="PrimaryCardModal" tabindex="-1" aria-labelledby="PrimaryCardLabel" aria-hidden="true" data-bs-backdrop="static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="PrimaryCardLabel">Set Default Card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">        
+        <div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
+            <div id="ledger_ui_primary_card_message"></div>
+            <div id="ledger_ui_primary_card_note">Please select a default primary card for automatic payment renewals</div>
+            <div id="ledger_ui_primary_card_list"></div> 
+            <div class='col-12 text-end'> 
+              <button class='btn btn-primary' id='save-primary-card-button'>Set Primary Card</button><span id='save_primary_card_loader'></span>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" tabindex="-1" id="DeleteCardConfirmModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmation to delete card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Please confirm that you would like to remove the card.</p>
+      </div>
+      <input type='hidden' value='' name='delete_card_id' id='delete_card_id'>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id='delete_card_confirm_btn'>Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id='nav-cards-tab-page' >
+  <div class="card">
+    <div class="card-header fw-bold h4" style='padding:30px;'>
+      <div class='row'>
+            <div class='col-6'>
+                  <i class="bi bi-check-circle-fill" style='color: #08c508;'></i>&nbsp; Cards
+            </div>
+            <div class='col-6 text-end'>
+                  <i class="bi fw-bold chevron-toggle" data-bs-target="#ledger_ui_card-details-card-body"></i>
+            </div>
+        </div>
+    </div>
+    <div class="card-body" id='ledger_ui_card-details-card-body'>
+       <div id="ledger_ui_card_details"></div>
+            
+    </div>
+  </div>
+</div>
+
+
+	   
+
+
+{% endif %}
+<script type="text/javascript" src="/static/ledger_api/js/ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script type="text/javascript" src="/static/ledger_api/js/system_ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<script type="text/javascript" src="/static/ledger_api/js/ledger_api_django_crispy_forms.js?ver={{ GIT_COMMIT_HASH }}"></script>
+
+<script>
+    system_ledger_management.var.system_user_id = '{{system_user_id}}';
+    system_ledger_management.var.ledger_user_id = '{{ledger_user_id}}';
+    system_ledger_management.init();
+</script>
+
+<div class="modal fade" id="id_create_edit_address_information_modal" tabindex="-1" aria-labelledby="AddressModalLabel" aria-hidden="true" data-bs-backdrop="static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="AddressModalLabel">Create Address</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id='id_create_edit_address_information'>
+        No Information Loaded
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% block additional_content %}
+{% endblock %}	   
+
+	   
+{% block accounts_message_bottom %}
+{% endblock %}
+
+
+{% else %}  
+  <div class="container">
+    <BR>
+    <div class='alert alert-danger'>
+      Your are currently not logged. Please login to access this page.
+    </div>
+  </div>
+{% endif %}
+
+</div>
+{% endblock %}
+
+
+
+
+{% block page_footer %}
+<footer class="footer mt-auto py-3">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <small class="float-right">&copy; Department of Biodiversity, Conservation and Attractions</small>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock page_footer %}
