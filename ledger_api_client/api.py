@@ -38,15 +38,18 @@ def process_payment_hpp(request):
     url = settings.LEDGER_API_URL+'/ledger/checkout/payment-details-hpp/'
     project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
     system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
+    system_url = settings.PAYMENT_INTERFACE_SYSTEM_URL
     api_key = settings.LEDGER_API_KEY
     payment_session = None
     basket_hash = ""    
+
     if 'payment_session' in request.session:
           payment_session = request.session.get('payment_session')
           basket_hash = request.session.get('basket_hash')
           cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','csrftoken': request.POST['payment-csrfmiddlewaretoken'],'LEDGER_API_KEY': api_key,}
 
-    myobj = {'payment_method':'card','PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id}
+    myobj = {'payment_method':'card','PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id,}
+
     for post_field in request.POST:
         if post_field == 'payment-csrfmiddlewaretoken':
              myobj['csrfmiddlewaretoken'] = request.POST[post_field]
@@ -230,6 +233,58 @@ def process_no(request):
     except Exception as e:
         resp = "ERROR Attempting to connect payment gateway please try again later"
     return HttpResponse(resp, content_type='application/json')
+
+
+@csrf_exempt
+def create_hpp_preauth_url(request):
+    django_version = float(str(django.VERSION[0])+'.'+str(django.VERSION[1]))
+    jsondata = {'status': 404, 'message': 'API Key Not Found'}
+    ledger_user_json  = {}
+    context = {}
+    cookies = {}
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/create_hpp_preauth_url/'+api_key+'/'
+    project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
+    system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
+    system_url = settings.PAYMENT_INTERFACE_SYSTEM_URL
+    api_key = settings.LEDGER_API_KEY    
+    payment_session = None
+    basket_hash = ""
+
+    if system_url is None or system_url == "":
+        raise ValidationError('Error: Unable to process payment request - system url not configured in settings')
+
+    user_logged_in = None
+    if django_version > 1.11:
+          is_authen = request.user.is_authenticated
+    else: 
+          is_authen = request.user.is_authenticated()
+
+    if is_authen:
+           user_logged_in = request.user.id
+
+    if 'payment_session' in request.session:
+          payment_session = request.session.get('payment_session')
+          basket_hash = request.session.get('basket_hash')
+          #cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','csrftoken': request.POST['payment-csrfmiddlewaretoken'],'LEDGER_API_KEY': api_key,}
+          cookies = {'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key,}
+
+    myobj = {'PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id, 'user_logged_in' : user_logged_in,'PAYMENT_INTERFACE_REDIRECT_URL': system_url+'/ledger-ui/accounts?tab=cards',}
+    for post_field in request.POST:
+        if post_field == 'payment-csrfmiddlewaretoken':
+            myobj['csrfmiddlewaretoken'] = request.POST[post_field]
+        else:
+            myobj[post_field] = request.POST[post_field]
+
+    resp = ""
+    try:
+        resp = requests.post(url, data = myobj, cookies=cookies)
+        print (resp.text)
+    except Exception as e:
+        resp = "ERROR Attempting to connect payment gateway please try again later"
+    return HttpResponse(resp, content_type='application/json')
+
+
 
 @csrf_exempt
 def get_card_tokens(request):
@@ -610,12 +665,10 @@ def get_account_details(request, user_id):
             if  resp['data']['phone_number'] is None:
                 resp['data']['phone_number'] = ''
 
-            if len(resp['data']['mobile_number']) >= 10 or len(resp['data']['phone_number']) >= 10:   
-                print ("TRIE")             
+            if len(resp['data']['mobile_number']) >= 10 or len(resp['data']['phone_number']) >= 10:             
                 resp['information_status']["contact_details_completed"] = True
 
-        # address validation
-        print (resp['data'])
+        # address validation        
         if 'postal_address' in resp['data']  and 'residential_address' in resp['data']: 
                 if len(resp['data']['residential_address']['line1']) < 3 or len(resp['data']['residential_address']['locality']) < 3 or len(resp['data']['residential_address']['postcode']) < 3 or len(resp['data']['residential_address']['state']) < 2:
                     pass

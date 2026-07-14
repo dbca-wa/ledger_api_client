@@ -62,6 +62,9 @@ urlpatterns = [
         re_path(r'^ledger-toolkit-api/get-card-tokens', api.get_card_tokens),
         re_path(r'^ledger-toolkit-api/delete-card-token/(?P<card_token_id>[0-9]+)/', api.delete_card_token),
         re_path(r'^ledger-toolkit-api/store-card/', api.store_card),
+        re_path(r'^ledger-toolkit-api/create-hpp-preauth-url/', api.create_hpp_preauth_url),
+
+        
         re_path(r'^ledger-toolkit-api/set-primary-card/', api.set_primary_card),
         re_path(r'^ledger-ui/api/get-organisation-details/(?P<org_id>[0-9]+)/', api.get_organisation_details, name='get-organisation-details'),
         re_path(r'^ledger-ui/api/update-organisation-details/(?P<org_id>[0-9]+)/', api.update_organisation_details, name='update-organisation-details'),
