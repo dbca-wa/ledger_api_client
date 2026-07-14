@@ -7,13 +7,13 @@ var system_ledger_management = {
         system_ledger_management.load_personal_details();
         system_ledger_management.load_contact_details();
         system_ledger_management.load_address_details();
-
+        
         var html = '';
         var ledger_ui_card_details = $('#ledger_ui_card_details').length;
         if (ledger_ui_card_details > 0) {                        
                 html += "<div id='div-ledger-ui-card-details-loader'>"+ledger_management.var.pagesettings.loader+"</div>";
                 html += "<div id='div-ledger-ui-card-details' class='row mx-md-n5 border p-2 ms-3 me-3 mb-3' style='display:none'>";
-                html += "<div ><div class='col-12 text-end'><button class='btn btn-sm btn-primary m-1' id='primary-card-button'>Primary Card</button><button class='btn btn-sm btn-primary m-1' id='add-card-button'>Add Card</button></a></div></div>";
+                html += "<div ><div class='col-12 text-end'><button class='btn btn-sm btn-primary m-1' id='primary-card-button'>Primary Card</button><button class='btn btn-sm btn-primary m-1' id='add-card-button'>Add Card</button><button class='btn btn-sm btn-primary m-1 d-none' id='add-card-button-hpp'>Add Card</button></a></div></div>";
                 html += "<div class='col-12' id='div-ledger-ui-list-card-details'></div>";
                 html += "</div>";
                 $('#ledger_ui_card_details').html(html);

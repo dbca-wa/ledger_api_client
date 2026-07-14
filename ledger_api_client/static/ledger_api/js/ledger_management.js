@@ -30,6 +30,7 @@ var ledger_management = {
                             await ledger_management.init_load_order.step5();
                         }},                    
 				},
+                payment_gateway_type: 'direct_api',
                 cards: [],
                 primary_card_id: -1,
                 pagesettings: {
@@ -1013,7 +1014,7 @@ var ledger_management = {
                 }
         },
         "cards": {
-            get_card_data: function() {
+             get_card_data: async function() {
                 $.ajax({
                     url: '/ledger-toolkit-api/get-card-tokens',
                     method: 'GET',
@@ -1022,8 +1023,16 @@ var ledger_management = {
                     success: function(response) {
 
                        ledger_management.var.cards = response.card_tokens;
-                       ledger_management.var.primary_card_id = response.primary_card
+                       ledger_management.var.primary_card_id = response.primary_card;
+                      
                        ledger_management.cards.display_cards();
+                       if (response.hasOwnProperty("payment_gateway_type")) {
+                           ledger_management.var.payment_gateway_type = response.payment_gateway_type;
+                           if (ledger_management.var.payment_gateway_type == 'hpp_redirect') {
+                               $("#add-card-button-hpp").removeClass("d-none");
+                               $("#add-card-button").addClass("d-none");
+                           }
+                       }
                     },
                     error: function(error) {
                             
@@ -1104,6 +1113,39 @@ var ledger_management = {
                     },
                 });                             
             },
+            save_card_hpp: function() { 
+                var data={}
+
+                $.ajax({
+                    url: '/ledger-toolkit-api/create-hpp-preauth-url/',
+                    method: 'POST',
+                    dataType: 'json',
+                    data: JSON.stringify({'payload': data,}),
+                    contentType: 'application/json',
+                    success: function(response) {
+                       
+                       if (response['status'] == 200) {
+                            
+                            window.location.href = response['hpp_redirect_url'];
+                       } else {
+                            var error = '';
+                            error = response['error'];
+                            $('#ledger_ui_add_card_message').html('<div class="alert alert-danger" role="alert">Error adding card, please check your details and try again. '+error+'</div>');                        
+                       }
+
+                       $('#id_number').prop( "disabled", false );
+                       $('#id_expiry_month_0').prop( "disabled", false );
+                       $('#id_expiry_month_1').prop( "disabled", false );
+                       $('#id_ccv').prop( "disabled", false );   
+
+                       $("#save-card-button").show();
+                       $("#save_card_loader").hide();                       
+                    },
+                    error: function(error) {
+                            alert("Error Saving Store Card");
+                    },
+                });               
+            },
             primary_display_cards: function() {
                 var primary_card = '';
                 var html = "";
@@ -1118,7 +1160,7 @@ var ledger_management = {
                     if (parseInt(ledger_management.var.primary_card_id) == parseInt(ledger_management.var.cards[i].id)) { 
                         primary_card = 'checked';               
                     }
-		            html += "<div class='col-8'>&nbsp;&nbsp;&nbsp;&nbsp;<i class='bi bi-credit-card-2-front-fill' style='color: #0037ff;'></i>&nbsp;&nbsp;&nbsp;"+ledger_management.var.cards[i].card_type+" ending "+ledger_management.var.cards[i].last_digits+" with expiry "+ledger_management.var.cards[i].expiry_date+"</div><div class='col-4 pt-1'><div class='form-check'><input class='form-check-input' type='radio' name='primary-card' id='PrimaryCard"+ledger_management.var.cards[i].id+"' value='"+ledger_management.var.cards[i].id+"' "+primary_card+"></div></div>";
+		            html += "<div class='col-8'>&nbsp;&nbsp;&nbsp;&nbsp;<i class='bi bi-credit-card-2-front-fill' style='color: #0037ff;'></i>&nbsp;&nbsp;&nbsp;"+ledger_management.var.cards[i].card_type+" with expiry "+ledger_management.var.cards[i].expiry_date+"</div><div class='col-4 pt-1'><div class='form-check'><input class='form-check-input' type='radio' name='primary-card' id='PrimaryCard"+ledger_management.var.cards[i].id+"' value='"+ledger_management.var.cards[i].id+"' "+primary_card+"></div></div>";
                 }
                 html += "</div>";
 
@@ -1162,11 +1204,13 @@ var ledger_management = {
 
 
             },
-            display_cards: function() {
+             display_cards: async function() {
                 var html = "";
                 html += "<div class='row pt-3 pb-3 ps-5 pe-5'>";
                 // html += "<div class='col-1'>Primary Card</div><div class='col-8'>Card</div><div>Action</div>";
                 var primary_card_html = "";
+                
+
                 
                 for (let i = 0; i < ledger_management.var.cards.length; i++) {
                      primary_card_html = "";
@@ -1175,7 +1219,7 @@ var ledger_management = {
                         primary_card_html = '<i class="bi bi-check-circle-fill" style="font-size: 24px; color: #1cb352;">&nbsp;</i>';
                      }
                      
-		             html += "<div class='col-8'>&nbsp;&nbsp;&nbsp;&nbsp;<i class='bi bi-credit-card-2-front-fill' style='color: #0037ff;'></i>&nbsp;&nbsp;&nbsp;"+ledger_management.var.cards[i].card_type+" ending "+ledger_management.var.cards[i].last_digits+" with expiry "+ledger_management.var.cards[i].expiry_date+"</div><div class='col-1'>"+primary_card_html+"</div><div class='col-3 pt-1 text-end'><button class='btn btn-sm btn-primary m-1' onclick='ledger_management.cards.delete_card_confirm("+'"'+ledger_management.var.cards[i].id+'"'+");'>Remove Card</button></div>";
+		             html += "<div class='col-8'>&nbsp;&nbsp;&nbsp;&nbsp;<i class='bi bi-credit-card-2-front-fill' style='color: #0037ff;'></i>&nbsp;&nbsp;&nbsp;"+ledger_management.var.cards[i].card_type+" with expiry "+ledger_management.var.cards[i].expiry_date+"</div><div class='col-1'>"+primary_card_html+"</div><div class='col-3 pt-1 text-end'><button class='btn btn-sm btn-primary m-1' onclick='ledger_management.cards.delete_card_confirm("+'"'+ledger_management.var.cards[i].id+'"'+");'>Remove Card</button></div>";
                 }
                 html += "</div>";
 
@@ -1189,7 +1233,7 @@ var ledger_management = {
                 if (ledger_ui_card_details > 0) {                        
                         html += "<div id='div-ledger-ui-card-details-loader'>"+ledger_management.var.pagesettings.loader+"</div>";
                         html += "<div id='div-ledger-ui-card-details' class='row mx-md-n5 border p-2 ms-3 me-3 mb-3' style='display:none'>";
-                        html += "<div ><div class='col-12 text-end'><button class='btn btn-sm btn-primary m-1' id='primary-card-button'>Primary Card</button><button class='btn btn-sm btn-primary m-1' id='add-card-button'>Add Card</button></a></div></div>";
+                        html += "<div ><div class='col-12 text-end'><button class='btn btn-sm btn-primary m-1' id='primary-card-button'>Primary Card</button><button class='btn btn-sm btn-primary m-1 ' id='add-card-button'>Add Card</button><button class='btn btn-sm btn-primary m-1 d-none' id='add-card-button-hpp'>Add Card</button></a></div></div>";
                         html += "<div class='col-12' id='div-ledger-ui-list-card-details'></div>";
                         html += "</div>";
                         $('#ledger_ui_card_details').html(html);
@@ -1206,9 +1250,20 @@ var ledger_management = {
                             $('#AddNewCardModal').modal('show');
                         });
 
+                        $("#add-card-button-hpp").click(function() {
+                           
+                            $('#AddNewCardHPPModal').modal('show');
+                        });
+
+
                         $("#save-card-button").click(function() {
                             ledger_management.cards.save_card();
                         });
+                        $("#save-card-button-hpp").click(function() {
+                            ledger_management.cards.save_card_hpp();
+                        });
+
+                        
 
                         $("#save_card_loader").hide();
                         $("#save_card_loader").html(ledger_management.var.pagesettings.button_loader);

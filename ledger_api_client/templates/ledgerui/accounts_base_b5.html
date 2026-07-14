@@ -83,7 +83,9 @@
 {% block accounts_message_top %}
 {% endblock %}
 
-
+{% block accounts_pris_message %}
+  {% include "ledgerui/accounts_pris_message.html" %}
+{% endblock %}
 
 <nav class='pb-1'>
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -199,6 +201,45 @@ ledger_management.init({{ request.user.id }});
 </script>
 
 {% if settings.LEDGER_UI_CARDS_MANAGEMENT is True %}
+
+<div class="modal fade" id="AddNewCardHPPModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Card</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
+            <div id="ledger_ui_add_card_message"></div>
+            <div class="clearfix">
+              <img src="/static/payments/img/visa-mastercard-2021.png">
+            </div>
+
+            <div class='col-9'>
+              <div class="form-group ">
+                <label for="id_ccv" class=" control-label required">
+                    
+                </label>
+                <div class="">
+                    
+                    <span class="help-block">                      
+                          To add a new card, please click continue and you will be redirected to the BPoint payment screen.  After entering your payment details into the bpoint payment screen a temporary preauth of 1 AUD will be made to your card.  
+                          <br>
+                    </span>
+                </div>    
+              </div>
+            </div>
+            <div class='col-9'> <BR>
+                  <button class='btn btn-primary' id='save-card-button-hpp'>Continue</button> <span id='save_card_loader'></span>
+            </div>       
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
 
 <div class="modal fade" id="AddNewCardModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-backdrop="static" data-keyboard="false">
   <div class="modal-dialog modal-xl">
@@ -316,7 +357,19 @@ ledger_management.init({{ request.user.id }});
     </div>
   </div>
 </div>
+<script>
+const queryString = window.location.search;
 
+// 2. Initialize URLSearchParams
+const urlParams = new URLSearchParams(queryString);
+
+// 3. Extract your specific parameters
+const tab = urlParams.get('tab');
+setTimeout(function() {
+    $('#nav-'+tab+'-tab').click();
+}, 1000);
+
+</script>
 
 {% endif %}
 

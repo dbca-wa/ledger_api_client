@@ -324,6 +324,19 @@
     system_ledger_management.var.system_user_id = '{{system_user_id}}';
     system_ledger_management.var.ledger_user_id = '{{ledger_user_id}}';
     system_ledger_management.init();
+
+    const queryString = window.location.search;
+
+    // 2. Initialize URLSearchParams
+    const urlParams = new URLSearchParams(queryString);
+
+    // 3. Extract your specific parameters
+    const tab = urlParams.get('tab');
+    setTimeout(function() {
+        $('#nav-'+tab+'-tab').click();
+    }, 1500);
+
+
 </script>
 
 <div class="modal fade" id="id_create_edit_address_information_modal" tabindex="-1" aria-labelledby="AddressModalLabel" aria-hidden="true" data-bs-backdrop="static" data-backdrop="static" data-keyboard="false">
