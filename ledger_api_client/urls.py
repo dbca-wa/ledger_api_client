@@ -22,6 +22,7 @@ urlpatterns = [
         re_path(r'^ledger-api/process-refund', api.process_refund),
         re_path(r'^ledger-api/process-zero', api.process_zero),
         re_path(r'^ledger-api/process-no', api.process_no),
+        re_path(r'^ledger-api/email-payment-method-link', api.send_save_payment_method_link),
 
         # System Admin Account Management
         re_path(r'^ledger-admin-api/accounts-management/list',  api.SystemUserAccountsList.as_view(), name='accounts-management-list'),

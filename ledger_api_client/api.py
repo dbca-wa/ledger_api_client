@@ -749,6 +749,35 @@ def update_account_details(request,user_id):
 
     return HttpResponse(json.dumps(resp), content_type='application/json')
 
+@csrf_exempt
+def send_save_payment_method_link(request):
+    cookies = {}
+    api_key = settings.LEDGER_API_KEY
+    url = settings.LEDGER_API_URL+'/ledgergw/remote/email-payment-method-link/'+api_key+'/'
+    project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
+    system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
+    api_key = settings.LEDGER_API_KEY
+    payment_session = None
+    basket_hash = ""
+
+    if 'payment_session' in request.session:
+            payment_session = request.session.get('payment_session')
+            basket_hash = request.session.get('basket_hash')
+            cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key,}
+
+    myobj = {'PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code,'PAYMENT_INTERFACE_SYSTEM_ID': system_id}
+    for post_field in request.POST:
+        if post_field == 'payment-csrfmiddlewaretoken':
+            myobj['csrfmiddlewaretoken'] = request.POST[post_field]
+        else:
+            myobj[post_field] = request.POST[post_field]
+
+    resp = ""
+    try:
+        resp = requests.post(url, data = myobj, cookies=cookies)
+    except Exception as e:
+        resp = "ERROR Attempting to connect payment gateway please try again later"
+    return HttpResponse(resp, content_type='application/json')
 
 class SystemUserAccountsList(AccountManagementPermissionMixin, views.APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, BasicAuthentication]
