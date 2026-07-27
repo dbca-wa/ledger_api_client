@@ -752,6 +752,50 @@ class SystemAccountChange(AccountManagementPermissionMixin, generic.UpdateView):
             return HttpResponseRedirect(self.get_absolute_account_url())
 
 
+class TempAddPaymentMethodView(TemplateView):
+
+    template_name = 'ledgerui/temp_add_payment_method.html'
+
+    def get(self, request, *args, **kwargs):
+
+        token = request.GET.get("token", None)
+
+        #validate token
+        if token:
+            url = settings.LEDGER_API_URL + "/ledgergw/remote/validate_save_payment_method_link_token/" + settings.LEDGER_API_KEY + "/?token=" + token
+            resp = requests.get(url)
+            json_resp = resp.json()
+            message = ""
+            user = None
+
+            if 'status' in json_resp and json_resp['status'] == '200':
+                validated = True
+                if 'data' in json_resp:
+                    email = json_resp['data']['email'] if 'email' in json_resp['data'] else None
+                    ledger_id = json_resp['data']['ledger_id'] if 'ledger_id' in json_resp['data'] else None
+
+                    user = ledger_models.EmailUserRO.objects.filter(ledger_id=ledger_id, email=email).first()
+
+                    if not user:
+                        validated = False
+                        message = "Unable to validate user."
+                else:
+                    validated = False
+                    message = "Unable to validate user."
+            else:
+                validated = False
+                if 'status' in json_resp and json_resp['status'] == '400':
+                    message = json_resp['message'] if "message" in json_resp else "Invalid Request"
+                else:
+                    message = "Unable to validate user."
+
+        context = {
+            "validated": validated,
+            "message": message,
+            "user": user,
+        }
+        return render(request, self.template_name, context)
+
 #class ProcessPaymentCheckout(TemplateView):
 #    template_name = 'payments/payment-details.html'
 #

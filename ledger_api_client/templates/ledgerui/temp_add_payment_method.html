@@ -1,0 +1,49 @@
+{% extends "webtemplate_dbca/base_b5.html" %}
+
+{% block header_top_menu %}
+<div id='ledger-payment-overtop'></div>
+{% endblock %}
+
+{% block extra_css %}
+     <link rel="stylesheet" type="text/css" href="/static/ledger_api/ledger_api.css?ver={{ GIT_COMMIT_HASH }}" />
+{% endblock %}
+
+{% block menubottom %}
+{% endblock %}
+
+{% block extra_style %}
+<style>
+    .footer {background-color: lightgrey}
+</style>
+{% endblock %}
+
+{% block menu_spacer %}
+{% endblock %}
+
+{% block content %}
+
+{% block accounts_message_top %}
+{% endblock %}
+
+
+
+{% block additional_content %}
+{% endblock %}	   
+	   
+{% block accounts_message_bottom %}
+{% endblock %}
+
+{% endblock %}
+
+
+{% block page_footer %}
+<footer class="footer mt-auto py-3">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <small class="float-right">&copy; Department of Biodiversity, Conservation and Attractions</small>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock page_footer %}
