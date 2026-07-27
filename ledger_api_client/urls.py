@@ -37,6 +37,9 @@ urlpatterns = [
         re_path(r'^ledger-ui/accounts',  views.AccountsView.as_view(), name='account'),
         re_path(r'^ledger-ui/organisation/(?P<pk>[0-9]+)/',  views.OrganisationView.as_view(), name='view-organisation'),
 
+        # Temporary Add Payment Method
+        re_path(r'^ledger-ui/temp-add-payment-method',  views.TempAddPaymentMethodView.as_view(), name='temp-add-payment-method'),
+
         # System Account Management - Store Personal Information in local system database but maintain link to ledger account id
         re_path(r'^ledger-ui/system-accounts-firsttime',  views.SystemAccountsFirstTimeView.as_view(), name='system-account-firstime'),
         re_path(r'^ledger-ui/system-accounts',  views.SystemAccountsView.as_view(), name='system-account'),
