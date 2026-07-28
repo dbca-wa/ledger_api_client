@@ -759,14 +759,19 @@ class TempAddPaymentMethodView(TemplateView):
     def get(self, request, *args, **kwargs):
 
         token = request.GET.get("token", None)
+        message = ""
+        user = None
+        validated = False
 
         #validate token
         if token:
             url = settings.LEDGER_API_URL + "/ledgergw/remote/validate_save_payment_method_link_token/" + settings.LEDGER_API_KEY + "/?token=" + token
-            resp = requests.get(url)
-            json_resp = resp.json()
-            message = ""
-            user = None
+            
+            try:
+                resp = requests.get(url)
+                json_resp = resp.json()
+            except:
+                json_resp = {}
 
             if 'status' in json_resp and json_resp['status'] == '200':
                 validated = True
