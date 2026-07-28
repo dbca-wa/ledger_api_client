@@ -287,7 +287,12 @@ def create_hpp_preauth_url(request):
 @csrf_exempt
 def token_create_hpp_preauth_url(request):
 
-    token = request.POST.get("token", None)
+    try:
+        data = json.loads(request.body)
+        token = data.get("token")
+    except:
+        token = None
+
     cookies = {}
     api_key = settings.LEDGER_API_KEY
     url = settings.LEDGER_API_URL+'/ledgergw/remote/create_hpp_preauth_url/'+api_key+'/'
@@ -301,10 +306,10 @@ def token_create_hpp_preauth_url(request):
 
     token_user = None
     if token:
-        url = settings.LEDGER_API_URL + "/ledgergw/remote/validate_save_payment_method_link_token/" + settings.LEDGER_API_KEY + "/?token=" + token
+        auth_url = settings.LEDGER_API_URL + "/ledgergw/remote/validate_save_payment_method_link_token/" + settings.LEDGER_API_KEY + "/?token=" + token
 
         try:
-            auth_resp = requests.get(url)
+            auth_resp = requests.get(auth_url)
             json_resp = auth_resp.json()
         except Exception as e:
             print(e)
