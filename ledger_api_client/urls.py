@@ -67,6 +67,7 @@ urlpatterns = [
         re_path(r'^ledger-toolkit-api/delete-card-token/(?P<card_token_id>[0-9]+)/', api.delete_card_token),
         re_path(r'^ledger-toolkit-api/store-card/', api.store_card),
         re_path(r'^ledger-toolkit-api/create-hpp-preauth-url/', api.create_hpp_preauth_url),
+        re_path(r'^ledger-toolkit-api/token-create-hpp-preauth-url/', api.token_create_hpp_preauth_url),
 
         
         re_path(r'^ledger-toolkit-api/set-primary-card/', api.set_primary_card),

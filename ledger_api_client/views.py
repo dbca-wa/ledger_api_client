@@ -799,6 +799,7 @@ class TempAddPaymentMethodView(TemplateView):
             "validated": validated,
             "message": message,
             "user": user,
+            "token": token,
         }
         return render(request, self.template_name, context)
 

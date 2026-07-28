@@ -1146,6 +1146,30 @@ var ledger_management = {
                     },
                 });               
             },
+            token_save_card_hpp: function() { 
+                var token = document.getElementById("token-save-hpp-token")
+                var data={"token":token}
+
+                $.ajax({
+                    url: '/ledger-toolkit-api/token-create-hpp-preauth-url/',
+                    method: 'POST',
+                    dataType: 'json',
+                    data: JSON.stringify({'payload': data,}),
+                    contentType: 'application/json',
+                    success: function(response) {
+                       if (response['status'] == 200) {
+                            window.location.href = response['hpp_redirect_url'];
+                       } else {
+                            var error = '';
+                            error = response['error'];
+                            $('#ledger_ui_add_card_message').html('<div class="alert alert-danger" role="alert">Error adding card, please check your details and try again. '+error+'</div>');                        
+                       }                     
+                    },
+                    error: function(error) {
+                            alert("Error Saving Store Card");
+                    },
+                });               
+            },
             primary_display_cards: function() {
                 var primary_card = '';
                 var html = "";
@@ -1261,6 +1285,9 @@ var ledger_management = {
                         });
                         $("#save-card-button-hpp").click(function() {
                             ledger_management.cards.save_card_hpp();
+                        });
+                        $("#token-save-card-button-hpp").click(function() {
+                            ledger_management.cards.token_save_card_hpp();
                         });
 
                         

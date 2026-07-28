@@ -25,9 +25,14 @@
 {% block accounts_message_top %}
 {% endblock %}
 
-{{message}}
+{% if message != "" %}
+<div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
+<div class="alert alert-danger" role="alert">{{message}}</div>
+</div>
+{% endif %}
 
 {% if validated %}
+<script type="text/javascript" src="/static/ledger_api/js/ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
 <div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
     <div id="ledger_ui_add_card_message"></div>
     <div class="clearfix">
@@ -40,12 +45,16 @@
             <span class="help-block">                      
                 To add a new card, please click continue and you will be redirected to the BPoint payment screen.  After entering your payment details into the bpoint payment screen a temporary preauth of 1 AUD will be made to your card.  
                 <br>
+
+                The card will be added to the account with email {{user.email}}. If this is not correct, please do not continue.
+
             </span>
         </div>    
         </div>
     </div>
     <div class='col-9'> <BR>
-        <button class='btn btn-primary' id='save-card-button-hpp'>Continue</button><span id='save_card_loader'></span>
+        <input type="hidden" name="token-save-hpp-token" id="token-save-hpp-token" value="{{token}}">
+        <button class='btn btn-primary' id='token-save-card-button-hpp'>Continue</button><span id='save_card_loader'></span>
     </div>       
 </div>
 {% endif %}
