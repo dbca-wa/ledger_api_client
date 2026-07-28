@@ -1147,7 +1147,7 @@ var ledger_management = {
                 });               
             },
             token_save_card_hpp: function() { 
-                var token = document.getElementById("token-save-hpp-token")
+                var token = document.getElementById("token-save-hpp-token").value
                 var data={"token":token}
 
                 $.ajax({
@@ -1258,7 +1258,7 @@ var ledger_management = {
                 $("#token-save-card-button-hpp").click(function() {
                     ledger_management.cards.token_save_card_hpp();
                 });
-                
+
                 if (ledger_ui_card_details > 0) {                        
                         html += "<div id='div-ledger-ui-card-details-loader'>"+ledger_management.var.pagesettings.loader+"</div>";
                         html += "<div id='div-ledger-ui-card-details' class='row mx-md-n5 border p-2 ms-3 me-3 mb-3' style='display:none'>";
