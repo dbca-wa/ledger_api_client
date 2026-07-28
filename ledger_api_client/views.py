@@ -770,16 +770,17 @@ class TempAddPaymentMethodView(TemplateView):
             try:
                 resp = requests.get(url)
                 json_resp = resp.json()
-            except:
+            except Exception as e:
+                print(e)
                 json_resp = {}
 
-            if 'status' in json_resp and json_resp['status'] == '200':
+            if 'status' in json_resp and str(json_resp['status']) == '200':
                 validated = True
                 if 'data' in json_resp:
                     email = json_resp['data']['email'] if 'email' in json_resp['data'] else None
                     ledger_id = json_resp['data']['ledger_id'] if 'ledger_id' in json_resp['data'] else None
 
-                    user = ledger_models.EmailUserRO.objects.filter(ledger_id=ledger_id, email=email).first()
+                    user = ledger_models.EmailUserRO.objects.filter(id=ledger_id, email=email).first()
 
                     if not user:
                         validated = False
@@ -789,7 +790,7 @@ class TempAddPaymentMethodView(TemplateView):
                     message = "Unable to validate user."
             else:
                 validated = False
-                if 'status' in json_resp and json_resp['status'] == '400':
+                if 'status' in json_resp and str(json_resp['status']) == '400':
                     message = json_resp['message'] if "message" in json_resp else "Invalid Request"
                 else:
                     message = "Unable to validate user."
