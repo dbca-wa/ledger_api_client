@@ -1154,7 +1154,7 @@ var ledger_management = {
                     url: '/ledger-toolkit-api/token-create-hpp-preauth-url/',
                     method: 'POST',
                     dataType: 'json',
-                    data: JSON.stringify({'payload': data,}),
+                    data: JSON.stringify(data),
                     contentType: 'application/json',
                     success: function(response) {
                        if (response['status'] == 200) {
