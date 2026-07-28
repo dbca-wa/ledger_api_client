@@ -25,7 +25,30 @@
 {% block accounts_message_top %}
 {% endblock %}
 
+{{message}}
 
+{% if validated %}
+<div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
+    <div id="ledger_ui_add_card_message"></div>
+    <div class="clearfix">
+        <img src="/static/payments/img/visa-mastercard-2021.png">
+    </div>
+
+    <div class='col-9'>
+        <div class="form-group">
+        <div class="">   
+            <span class="help-block">                      
+                To add a new card, please click continue and you will be redirected to the BPoint payment screen.  After entering your payment details into the bpoint payment screen a temporary preauth of 1 AUD will be made to your card.  
+                <br>
+            </span>
+        </div>    
+        </div>
+    </div>
+    <div class='col-9'> <BR>
+        <button class='btn btn-primary' id='save-card-button-hpp'>Continue</button><span id='save_card_loader'></span>
+    </div>       
+</div>
+{% endif %}
 
 {% block additional_content %}
 {% endblock %}	   
