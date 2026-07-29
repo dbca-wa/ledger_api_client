@@ -299,7 +299,7 @@ def token_create_hpp_preauth_url(request):
     project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
     system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
     system_url = settings.PAYMENT_INTERFACE_SYSTEM_URL
-    redirect_url = system_url+'/ledger-ui/temp-add-payment-method-success/?token='+token
+    redirect_url = system_url+'/ledger-ui/success-temp-add-payment-method/?token='+token
     api_key = settings.LEDGER_API_KEY    
 
     if system_url is None or system_url == "":
