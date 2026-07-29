@@ -11,7 +11,7 @@ from django.urls import path
 
 urlpatterns = [
         re_path(r'^ledger-api/payment-details$', views.PaymentDetailCheckout.as_view(), name='ledgergw-payment-details'),
-        re_path(r'^ledger-ui/temp-payment$', views.TokenPaymentDetailCheckout.as_view(), name='ledgergw-token-payment-details'),
+        re_path(r'^ledger-ui/temp-payment', views.TokenPaymentDetailCheckout.as_view(), name='ledgergw-token-payment-details'),
         re_path(r'^ledger-api/pay-invoice/(?P<reference>\d+)/$', views.PayInvoice.as_view(), name='ledgergw-payment-invoice'),
         
         #url(r'^ledger-api/process-payment$', views.ProcessPaymentCheckout.as_view(), name='ledgergw-process-payment'),
