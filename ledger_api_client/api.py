@@ -299,6 +299,7 @@ def token_create_hpp_preauth_url(request):
     project_code = settings.PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE
     system_id = settings.PAYMENT_INTERFACE_SYSTEM_ID
     system_url = settings.PAYMENT_INTERFACE_SYSTEM_URL
+    redirect_url = system_url+'/ledger-ui/temp-add-payment-method-success/?token='+token
     api_key = settings.LEDGER_API_KEY    
 
     if system_url is None or system_url == "":
@@ -326,7 +327,7 @@ def token_create_hpp_preauth_url(request):
             'PAYMENT_INTERFACE_SYSTEM_PROJECT_CODE': project_code, 
             'PAYMENT_INTERFACE_SYSTEM_ID': system_id, 
             'user_logged_in' : token_user, 
-            'PAYMENT_INTERFACE_REDIRECT_URL': system_url, #TODO redirect page
+            'PAYMENT_INTERFACE_REDIRECT_URL': redirect_url,
         }
         for post_field in request.POST:
             if post_field == 'payment-csrfmiddlewaretoken':
