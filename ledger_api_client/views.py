@@ -120,6 +120,16 @@ class TokenPaymentDetailCheckout(TemplateView):
                 if 'data' in json_resp:
                     basket_id = json_resp['data']['basket_id'] if 'basket_id' in json_resp['data'] else None
 
+                    checkout_parameters = {
+                        "user_logged_in": json_resp['data']['ledger_id'] if 'ledger_id' in json_resp['data'] else None,
+                        "system": json_resp['data']['system'] if 'system' in json_resp['data'] else None,
+                        "return_url": json_resp['data']['return_url'] if 'return_url' in json_resp['data'] else None,
+                        "return_preload_url": json_resp['data']['return_preload_url'] if 'return_preload_url' in json_resp['data'] else None,
+                        "invoice_text": json_resp['data']['invoice_text'] if 'invoice_text' in json_resp['data'] else None,
+                        "basket_owner": json_resp['data']['basket_owner'] if 'basket_owner' in json_resp['data'] else None,
+                        "session_type": json_resp['data']['session_type'] if 'session_type' in json_resp['data'] else None,
+                    }
+
             if not basket_id:
                 context['data'] = render_to_string('payments/gateway-error.html', {'error': 'Could not check out basket. Access token may be invalid or expired.'}) 
                 return render(request, self.template_name, context)
@@ -128,6 +138,8 @@ class TokenPaymentDetailCheckout(TemplateView):
             if 'data' in basket_totals:
                 if 'basket_total' in basket_totals['data']:
                     payment_total = Decimal(basket_totals['data']['basket_total'])
+
+            ledger_api_client_utils.create_checkout_session(request, checkout_parameters)
 
             cookies = {'ledgergw_basket': basket_id, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key}
 
