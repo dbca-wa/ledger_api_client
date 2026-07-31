@@ -1,0 +1,17 @@
+{% extends "webtemplate_dbca/base_b5.html" %}
+
+{% block header_top_menu %}
+<div id='ledger-payment-overtop'></div>
+{% endblock %}
+
+{% block extra_css %}
+ <link rel="stylesheet" type="text/css" href="/static/ledger_api/ledger_api.css?ver={{ GIT_COMMIT_HASH }}" />
+ {% endblock %}
+
+ {% block content %}
+    {% block page_content_inner_top %}{% endblock %}
+    <div class="">
+      <p>Payment process completed.</p>
+    </div>
+{% endblock %}
+

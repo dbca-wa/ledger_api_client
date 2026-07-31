@@ -127,7 +127,7 @@ class TokenPaymentDetailCheckout(TemplateView):
                     checkout_parameters = {
                         "system": json_resp['data']['system'] if 'system' in json_resp['data'] else None,
                         "fallback_url": settings.PAYMENT_INTERFACE_SYSTEM_URL,
-                        "return_url": settings.PAYMENT_INTERFACE_SYSTEM_URL, #TODO override with login-less success interface
+                        "return_url": settings.PAYMENT_INTERFACE_SYSTEM_URL + "/ledger-ui/token-payment-success",
                         "return_preload_url": json_resp['data']['return_preload_url'] if 'return_preload_url' in json_resp['data'] else None,
                         "invoice_text": json_resp['data']['invoice_text'] if 'invoice_text' in json_resp['data'] else None,
                         "basket_owner": json_resp['data']['basket_owner'] if 'basket_owner' in json_resp['data'] else None,
@@ -166,6 +166,10 @@ class TokenPaymentDetailCheckout(TemplateView):
             context['data'] = render_to_string('payments/gateway-error.html', {'error': 'There was an error connecting to the Payment Gateway please try again later','settings': settings},)             
              #context['data'] = "There was error connecting to the Payment Gateway please try again later"
         return render(request, self.template_name, context)
+
+
+class TokenPaymentSuccess(TemplateView):
+    template_name = 'payments/token-payment-success.html'
 
 class PayInvoice(TemplateView):
     template_name = 'payments/pay-invoice.html'
