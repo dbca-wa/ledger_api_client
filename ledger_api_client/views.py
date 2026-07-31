@@ -120,6 +120,8 @@ class TokenPaymentDetailCheckout(TemplateView):
                 if 'data' in json_resp:
                     basket_id = json_resp['data']['basket_id'] if 'basket_id' in json_resp['data'] else None
                     basket_hash = json_resp['data']['basket_hash'] if 'basket_hash' in json_resp['data'] else None
+                    future_invoice = json_resp['data']['future_invoice'] if 'future_invoice' in json_resp['data'] else None
+                    invoice_reference = json_resp['data']['invoice_reference'] if 'invoice_reference' in json_resp['data'] else None
                     request.session['basket_hash'] = basket_hash
 
                     checkout_parameters = {
@@ -141,7 +143,11 @@ class TokenPaymentDetailCheckout(TemplateView):
                 if 'basket_total' in basket_totals['data']:
                     payment_total = Decimal(basket_totals['data']['basket_total'])
 
-            ledger_api_client_utils.create_checkout_session(request, checkout_parameters)
+            if not future_invoice:
+                ledger_api_client_utils.create_checkout_session(request, checkout_parameters)
+            else:
+                ledger_api_client_utils.generate_payment_session(request, invoice_reference, checkout_parameters["return_url"], checkout_parameters["fallback_url"])
+
             payment_session = request.session.get('payment_session')
             cookies = {'sessionid': payment_session, 'ledgergw_basket': basket_hash, 'no_header': 'true', 'payment_api_wrapper': 'true','LEDGER_API_KEY': api_key}
 
