@@ -120,6 +120,7 @@ class TokenPaymentDetailCheckout(TemplateView):
                 if 'data' in json_resp:
                     basket_id = json_resp['data']['basket_id'] if 'basket_id' in json_resp['data'] else None
                     basket_hash = json_resp['data']['basket_hash'] if 'basket_hash' in json_resp['data'] else None
+                    request.session['basket_hash'] = basket_hash
 
                     checkout_parameters = {
                         "system": json_resp['data']['system'] if 'system' in json_resp['data'] else None,
