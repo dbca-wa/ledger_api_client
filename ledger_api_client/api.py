@@ -728,11 +728,14 @@ def update_account_details(request,user_id):
         myobj["authenticated_ledger_id"] = request.user.id
         for p in payload_data_keys:
             if p in keys_allowed:
-               myobj[p] = payload[p]
-               if p == 'residential_address':
-                    myobj[p] = json.dumps(payload[p])
-               if p == 'postal_address':
-                    myobj[p] = json.dumps(payload[p])
+                myobj[p] = payload[p]
+                if p in ['residential_address', 'postal_address']:
+                    addr_data = payload[p]
+                    # Convert boolean values to lower-case strings to avoid remote ledgergw crash
+                    for k, v in addr_data.items():
+                        if isinstance(v, bool):
+                            addr_data[k] = str(v).lower()
+                    myobj[p] = json.dumps(addr_data)
         #resp = ""
         cookies = ""
         try:
