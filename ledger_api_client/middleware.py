@@ -68,11 +68,13 @@ class SSOLoginMiddleware(MiddlewareMixin):
                               if user_obj['email'].lower() != request.META['HTTP_REMOTE_USER'].lower():
                                   response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
                                   response.delete_cookie('sessionid')
+                                  response.delete_cookie('app_sessionid')
                                   return response
                  except:
                      print ("user_auth request user does not exist")
                      response = HttpResponse("<center><h1 style='font-family: Arial, Helvetica, sans-serif;'>Wait one moment please...</h1><br><img src='/static/ledger_api/images/ajax-loader-spinner.gif'></center><script> location.reload();</script>")
                      response.delete_cookie('sessionid')
+                     response.delete_cookie('app_sessionid')
                      return response
             
              if user_auth:                        
