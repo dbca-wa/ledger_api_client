@@ -520,7 +520,6 @@ var ledger_management = {
                     // ledger_management.var.identification_attachment.attachment_cache[0].reader.result
 
                     ledger_management.update_account_details(data); 
-                    ledger_management.get_account_details();
                     ledger_management.identification.get_data_loading();
                 },
                 init: function() {
