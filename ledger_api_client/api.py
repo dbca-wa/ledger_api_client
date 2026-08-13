@@ -626,22 +626,31 @@ def update_account_details(request,user_id):
         url = settings.LEDGER_API_URL+'/ledgergw/remote/update-userid/'+str(user_id)+'/'+api_key+'/'
         myobj = {}
         myobj["authenticated_ledger_id"] = request.user.id
+
+        # Handle postal_address sync and ensure boolean type for ledgergw
+        if 'postal_address' in payload:
+            postal_addr = payload['postal_address']
+            is_same = postal_addr.get('postal_same_as_residential')
+
+            if is_same is True or str(is_same).lower() in ['true', '1']:
+                postal_addr['postal_same_as_residential'] = True  # Keep boolean True
+            else:
+                postal_addr['postal_same_as_residential'] = False  # Keep boolean False
+
         for p in payload_data_keys:
             if p in keys_allowed:
-                myobj[p] = payload[p]
                 if p in ['residential_address', 'postal_address']:
-                    addr_data = payload[p]
-                    # Convert boolean values to lower-case strings to avoid remote ledgergw crash
-                    for k, v in addr_data.items():
-                        if isinstance(v, bool):
-                            addr_data[k] = str(v).lower()
-                    myobj[p] = json.dumps(addr_data)
-        #resp = ""
+                    myobj[p] = json.dumps(payload[p])  # Serialize with booleans intact
+                else:
+                    myobj[p] = payload[p]
+        
         cookies = ""
         try:
             api_resp = requests.post(url, data = myobj, cookies=cookies)
+            print("=== LEDGERGW RAW RESPONSE CODE ===", api_resp.status_code)
+            print("=== LEDGERGW RAW RESPONSE TEXT ===", api_resp.text)
         except Exception as e:
-            print (e)
+            print("=== POST ERROR ===", e)
             resp['status'] = 501
             resp['message'] = "ERROR Attempting to connect payment gateway please try again later"
 
