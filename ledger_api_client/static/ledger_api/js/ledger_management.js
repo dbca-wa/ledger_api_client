@@ -1145,6 +1145,30 @@ var ledger_management = {
                     },
                 });               
             },
+            token_save_card_hpp: function() { 
+                var token = document.getElementById("token-save-hpp-token").value
+                var data={"token":token}
+
+                $.ajax({
+                    url: '/ledger-toolkit-api/token-create-hpp-preauth-url/',
+                    method: 'POST',
+                    dataType: 'json',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json',
+                    success: function(response) {
+                       if (response['status'] == 200) {
+                            window.location.href = response['hpp_redirect_url'];
+                       } else {
+                            var error = '';
+                            error = response['error'];
+                            $('#ledger_ui_add_card_message').html('<div class="alert alert-danger" role="alert">Error adding card, please check your details and try again. '+error+'</div>');                        
+                       }                     
+                    },
+                    error: function(error) {
+                            alert("Error Saving Store Card");
+                    },
+                });               
+            },
             primary_display_cards: function() {
                 var primary_card = '';
                 var html = "";
@@ -1229,6 +1253,11 @@ var ledger_management = {
             init: function() {
                 var html = '';
                 var ledger_ui_card_details = $('#ledger_ui_card_details').length;
+
+                $("#token-save-card-button-hpp").click(function() {
+                    ledger_management.cards.token_save_card_hpp();
+                });
+
                 if (ledger_ui_card_details > 0) {                        
                         html += "<div id='div-ledger-ui-card-details-loader'>"+ledger_management.var.pagesettings.loader+"</div>";
                         html += "<div id='div-ledger-ui-card-details' class='row mx-md-n5 border p-2 ms-3 me-3 mb-3' style='display:none'>";
@@ -1261,8 +1290,6 @@ var ledger_management = {
                         $("#save-card-button-hpp").click(function() {
                             ledger_management.cards.save_card_hpp();
                         });
-
-                        
 
                         $("#save_card_loader").hide();
                         $("#save_card_loader").html(ledger_management.var.pagesettings.button_loader);

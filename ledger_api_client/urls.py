@@ -11,6 +11,8 @@ from django.urls import path
 
 urlpatterns = [
         re_path(r'^ledger-api/payment-details$', views.PaymentDetailCheckout.as_view(), name='ledgergw-payment-details'),
+        re_path(r'^ledger-ui/temp-payment', views.TokenPaymentDetailCheckout.as_view(), name='ledgergw-token-payment-details'),
+        re_path(r'^ledger-ui/token-payment-success', views.TokenPaymentSuccess.as_view(), name='ledgergw-token-payment-success'),
         re_path(r'^ledger-api/pay-invoice/(?P<reference>\d+)/$', views.PayInvoice.as_view(), name='ledgergw-payment-invoice'),
         
         #url(r'^ledger-api/process-payment$', views.ProcessPaymentCheckout.as_view(), name='ledgergw-process-payment'),
@@ -22,6 +24,8 @@ urlpatterns = [
         re_path(r'^ledger-api/process-refund', api.process_refund),
         re_path(r'^ledger-api/process-zero', api.process_zero),
         re_path(r'^ledger-api/process-no', api.process_no),
+        re_path(r'^ledger-api/email-payment-method-link', api.send_save_payment_method_link),
+        re_path(r'^ledger-api/email-payment-link', api.send_payment_link),
 
         # System Admin Account Management
         re_path(r'^ledger-admin-api/accounts-management/list',  api.SystemUserAccountsList.as_view(), name='accounts-management-list'),
@@ -35,6 +39,10 @@ urlpatterns = [
         re_path(r'^ledger-ui/accounts-firsttime',  views.AccountsFirstTimeView.as_view(), name='account-firstime'),
         re_path(r'^ledger-ui/accounts',  views.AccountsView.as_view(), name='account'),
         re_path(r'^ledger-ui/organisation/(?P<pk>[0-9]+)/',  views.OrganisationView.as_view(), name='view-organisation'),
+
+        # Temporary Add Payment Method
+        re_path(r'^ledger-ui/temp-add-payment-method',  views.TempAddPaymentMethodView.as_view(), name='temp-add-payment-method'),
+        re_path(r'^ledger-ui/success-temp-add-payment-method',  views.TempAddPaymentMethodSuccessView.as_view(), name='success-temp-add-payment-method'),
 
         # System Account Management - Store Personal Information in local system database but maintain link to ledger account id
         re_path(r'^ledger-ui/system-accounts-firsttime',  views.SystemAccountsFirstTimeView.as_view(), name='system-account-firstime'),
@@ -63,6 +71,7 @@ urlpatterns = [
         re_path(r'^ledger-toolkit-api/delete-card-token/(?P<card_token_id>[0-9]+)/', api.delete_card_token),
         re_path(r'^ledger-toolkit-api/store-card/', api.store_card),
         re_path(r'^ledger-toolkit-api/create-hpp-preauth-url/', api.create_hpp_preauth_url),
+        re_path(r'^ledger-toolkit-api/token-create-hpp-preauth-url/', api.token_create_hpp_preauth_url),
 
         
         re_path(r'^ledger-toolkit-api/set-primary-card/', api.set_primary_card),
