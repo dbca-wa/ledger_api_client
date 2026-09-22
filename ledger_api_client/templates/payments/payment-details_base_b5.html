@@ -5,6 +5,12 @@
 <div id='ledger-payment-overtop'></div>
 {% endblock %}
 
+{% block header_js %}
+    <script src="/static/common_addons/node_modules/jquery/dist/jquery.js?ver={{ GIT_COMMIT_HASH }}"></script>
+    <script src="/static/common_addons/node_modules/@popperjs/core/dist/umd/popper.js?ver={{ GIT_COMMIT_HASH }}"></script>
+    <script src="/static/common_addons/node_modules/bootstrap/dist/js/bootstrap.js?ver={{ GIT_COMMIT_HASH }}"></script>
+{% endblock %}
+
 {% block extra_css %}
  <link rel="stylesheet" type="text/css" href="/static/ledger_api/ledger_api.css?ver={{ GIT_COMMIT_HASH }}" />
 {% endblock %}
@@ -94,3 +100,6 @@
     </div>
 </footer>
 {% endblock page_footer %}
+
+{% block footer_js%}
+{% endblock %}

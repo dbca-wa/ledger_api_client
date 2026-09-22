@@ -4,6 +4,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 #from django.core.urlresolvers import reverse
 from django.views.generic.base import View, TemplateView
+from rest_framework.views import APIView
 from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.utils import timezone
@@ -83,6 +84,49 @@ class PaymentDetailCheckout(TemplateView):
              #context['data'] = "There was error connecting to the Payment Gateway please try again later"
         return render(request, self.template_name, context)
 
+
+class CreateTokenPaymentSession(APIView):
+
+    def get(self, request, *args, **kwargs):
+        token = request.GET.get("token")
+
+        if token:
+            auth_url = settings.LEDGER_API_URL + "/ledgergw/remote/validate_payment_link_token/" + settings.LEDGER_API_KEY + "/?token=" + token
+            try:
+                auth_resp = requests.get(auth_url)
+                json_resp = auth_resp.json()
+            except Exception as e:
+                print(e)
+                json_resp = {}
+
+            if 'status' in json_resp and str(json_resp['status']) == '200':
+                if 'data' in json_resp:
+                    basket_id = json_resp['data']['basket_id'] if 'basket_id' in json_resp['data'] else None
+                    basket_hash = json_resp['data']['basket_hash'] if 'basket_hash' in json_resp['data'] else None
+                    future_invoice = json_resp['data']['future_invoice'] if 'future_invoice' in json_resp['data'] else None
+                    invoice_reference = json_resp['data']['invoice_reference'] if 'invoice_reference' in json_resp['data'] else None
+                    request.session['basket_hash'] = basket_hash
+
+                    checkout_parameters = {
+                        "system": json_resp['data']['system'] if 'system' in json_resp['data'] else None,
+                        "fallback_url": settings.PAYMENT_INTERFACE_SYSTEM_URL,
+                        "return_url": settings.PAYMENT_INTERFACE_SYSTEM_URL + "/ledger-ui/token-payment-success",
+                        "return_preload_url": json_resp['data']['return_preload_url'] if 'return_preload_url' in json_resp['data'] else None,
+                        "invoice_text": json_resp['data']['invoice_text'] if 'invoice_text' in json_resp['data'] else None,
+                        "basket_owner": json_resp['data']['basket_owner'] if 'basket_owner' in json_resp['data'] else None,
+                        "session_type": json_resp['data']['session_type'] if 'session_type' in json_resp['data'] else None,
+                    }
+
+            if not future_invoice:
+                ledger_api_client_utils.create_checkout_session(request, checkout_parameters)
+            else:
+                ledger_api_client_utils.generate_payment_session(request, invoice_reference, checkout_parameters["return_url"], checkout_parameters["fallback_url"])
+
+        return redirect('/ledger-api/payment-details')
+
+
+class TokenPaymentSuccess(TemplateView):
+    template_name = 'payments/token-payment-success.html'
 
 class PayInvoice(TemplateView):
     template_name = 'payments/pay-invoice.html'
@@ -751,6 +795,107 @@ class SystemAccountChange(AccountManagementPermissionMixin, generic.UpdateView):
         else:            
             return HttpResponseRedirect(self.get_absolute_account_url())
 
+
+class TempAddPaymentMethodView(TemplateView):
+
+    template_name = 'ledgerui/temp_add_payment_method.html'
+
+    def get(self, request, *args, **kwargs):
+
+        token = request.GET.get("token", None)
+        message = ""
+        user = None
+        validated = False
+
+        #validate token
+        if token:
+            url = settings.LEDGER_API_URL + "/ledgergw/remote/validate_save_payment_method_link_token/" + settings.LEDGER_API_KEY + "/?token=" + token
+            
+            try:
+                resp = requests.get(url)
+                json_resp = resp.json()
+            except Exception as e:
+                print(e)
+                json_resp = {}
+
+            if 'status' in json_resp and str(json_resp['status']) == '200':
+                validated = True
+                if 'data' in json_resp:
+                    email = json_resp['data']['email'] if 'email' in json_resp['data'] else None
+                    ledger_id = json_resp['data']['ledger_id'] if 'ledger_id' in json_resp['data'] else None
+
+                    user = ledger_models.EmailUserRO.objects.filter(id=ledger_id, email=email).first()
+
+                    if not user:
+                        validated = False
+                        message = "Unable to validate user."
+                else:
+                    validated = False
+                    message = "Unable to validate user."
+            else:
+                validated = False
+                if 'status' in json_resp and str(json_resp['status']) == '400':
+                    message = json_resp['message'] if "message" in json_resp else "Invalid Request"
+                else:
+                    message = "Unable to validate user."
+
+        context = {
+            "validated": validated,
+            "message": message,
+            "user": user,
+            "token": token,
+        }
+        return render(request, self.template_name, context)
+
+class TempAddPaymentMethodSuccessView(TemplateView):
+
+    template_name = 'ledgerui/temp_add_payment_method_success.html'
+
+    def get(self, request, *args, **kwargs):
+
+        token = request.GET.get("token", None)
+        message = ""
+        user = None
+        validated = False
+
+        #validate token
+        if token:
+            url = settings.LEDGER_API_URL + "/ledgergw/remote/validate_save_payment_method_link_token/" + settings.LEDGER_API_KEY + "/?token=" + token
+
+            try:
+                resp = requests.get(url)
+                json_resp = resp.json()
+            except Exception as e:
+                print(e)
+                json_resp = {}
+
+            if 'status' in json_resp and str(json_resp['status']) == '200':
+                validated = True
+                if 'data' in json_resp:
+                    email = json_resp['data']['email'] if 'email' in json_resp['data'] else None
+                    ledger_id = json_resp['data']['ledger_id'] if 'ledger_id' in json_resp['data'] else None
+
+                    user = ledger_models.EmailUserRO.objects.filter(id=ledger_id, email=email).first()
+
+                    if not user:
+                        validated = False
+                        message = "Unable to validate user. Card may still have been successfully added."
+                else:
+                    validated = False
+                    message = "Unable to validate user. Card may still have been successfully added."
+            else:
+                validated = False
+                if 'status' in json_resp and str(json_resp['status']) == '400':
+                    message = json_resp['message'] if "message" in json_resp else "Invalid Request"
+                else:
+                    message = "Unable to validate user.  Card may still have been successfully added."
+
+        context = {
+            "validated": validated,
+            "message": message,
+            "user": user,
+        }
+        return render(request, self.template_name, context)
 
 #class ProcessPaymentCheckout(TemplateView):
 #    template_name = 'payments/payment-details.html'

@@ -1,0 +1,84 @@
+{% extends "webtemplate_dbca/base_b5.html" %}
+
+{% block header_top_menu %}
+<div id='ledger-payment-overtop'></div>
+{% endblock %}
+
+{% block extra_css %}
+     <link rel="stylesheet" type="text/css" href="/static/ledger_api/ledger_api.css?ver={{ GIT_COMMIT_HASH }}" />
+{% endblock %}
+
+{% block menubottom %}
+{% endblock %}
+
+{% block extra_style %}
+<style>
+    .footer {background-color: lightgrey}
+</style>
+{% endblock %}
+
+{% block menu_spacer %}
+{% endblock %}
+
+{% block content %}
+
+{% block accounts_message_top %}
+{% endblock %}
+
+{% if message != "" %}
+<div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
+<div class="alert alert-danger" role="alert">{{message}}</div>
+</div>
+{% endif %}
+
+{% if validated %}
+<script type="text/javascript" src="/static/ledger_api/js/ledger_management.js?ver={{ GIT_COMMIT_HASH }}"></script>
+<div class='row mx-md-n5 border p-2 ms-3 me-3 mb-3'>
+    <div id="ledger_ui_add_card_message"></div>
+    <div class="clearfix">
+        <img src="/static/payments/img/visa-mastercard-2021.png">
+    </div>
+
+    <div class='col-9'>
+        <div class="form-group">
+        <div class="">   
+            <span class="help-block">                      
+                To add a new card, please click continue and you will be redirected to the BPoint payment screen.  After entering your payment details into the bpoint payment screen a temporary preauth of 1 AUD will be made to your card.  
+                <br>
+                <br>
+                The card will be added to the account with email {{user.email}}. If this is not correct, please do not continue.
+
+            </span>
+        </div>    
+        </div>
+    </div>
+    <div class='col-9'> <BR>
+        <input type="hidden" name="token-save-hpp-token" id="token-save-hpp-token" value="{{token}}">
+        <button class='btn btn-primary' id='token-save-card-button-hpp'>Continue</button><span id='save_card_loader'></span>
+    </div>       
+</div>
+<script>
+ledger_management.init({{user.id}});
+</script>
+{% endif %}
+
+{% block additional_content %}
+{% endblock %}	   
+	   
+{% block accounts_message_bottom %}
+{% endblock %}
+
+{% endblock %}
+
+
+{% block page_footer %}
+<footer class="footer mt-auto py-3">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <small class="float-right">&copy; Department of Biodiversity, Conservation and Attractions</small>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock page_footer %}
