@@ -4,6 +4,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 #from django.core.urlresolvers import reverse
 from django.views.generic.base import View, TemplateView
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
@@ -87,9 +88,10 @@ class PaymentDetailCheckout(TemplateView):
 
 class CreateTokenPaymentSession(APIView):
 
+    permission_classes = [AllowAny]
+
     def get(self, request, *args, **kwargs):
         token = request.GET.get("token")
-
         if token:
             auth_url = settings.LEDGER_API_URL + "/ledgergw/remote/validate_payment_link_token/" + settings.LEDGER_API_KEY + "/?token=" + token
             try:
@@ -117,10 +119,10 @@ class CreateTokenPaymentSession(APIView):
                         "session_type": json_resp['data']['session_type'] if 'session_type' in json_resp['data'] else None,
                     }
 
-            if not future_invoice:
-                ledger_api_client_utils.create_checkout_session(request, checkout_parameters)
-            else:
-                ledger_api_client_utils.generate_payment_session(request, invoice_reference, checkout_parameters["return_url"], checkout_parameters["fallback_url"])
+                    if not future_invoice:
+                        ledger_api_client_utils.create_checkout_session(request, checkout_parameters)
+                    else:
+                        ledger_api_client_utils.generate_payment_session(request, invoice_reference, checkout_parameters["return_url"], checkout_parameters["fallback_url"])
 
         return redirect('/ledger-api/payment-details')
 
