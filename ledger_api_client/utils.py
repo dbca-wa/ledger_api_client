@@ -14,6 +14,8 @@ from django.core.cache import cache
 from decimal import getcontext
 from django.urls import reverse
 
+from ledger_api_client.ledger_models import Invoice, Basket
+
 def oracle_parser(): 
     pass
 
@@ -762,3 +764,19 @@ def check_oracle_code(oracle_code):
         resp_json = {}
     return resp_json
 
+def validate_booking_and_invoice_references(booking_reference, invoice_reference):
+    """
+    Checks that a booking reference and an invoice reference belong to same order via their respective basket and invoice objects
+
+    Returns True if an order is shared, otherwise False
+    """
+    baskets = Basket.objects.filter(system=settings.PAYMENT_INTERFACE_SYSTEM_ID).filter(booking_reference=booking_reference).order_by('-date_created')
+    invoice = Invoice.objects.filter(reference=invoice_reference).last()
+
+    order_number = invoice.order_number if invoice else None
+
+    for basket in baskets:
+        order = Order.objects.get(basket_id=basket.id)
+        if order_number == order.number:
+            return True
+    return False
