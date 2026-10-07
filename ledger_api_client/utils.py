@@ -15,7 +15,6 @@ from decimal import getcontext
 from django.urls import reverse
 
 from ledger_api_client.ledger_models import Invoice, Basket
-from ledger_api_client import utils
 
 def oracle_parser(): 
     pass
@@ -777,7 +776,7 @@ def validate_booking_and_invoice_references(booking_reference, invoice_reference
     order_number = invoice.order_number if invoice else None
 
     for basket in baskets:
-        order = utils.Order.objects.get(basket_id=basket.id)
+        order = Order.objects.get(basket_id=basket.id)
         if order_number == order.number:
             return True
     return False
