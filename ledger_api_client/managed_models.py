@@ -87,6 +87,12 @@ class SystemGroupPermission(models.Model):
             return str(self.system_group)
 
 
+@receiver([post_save, post_delete], sender=SystemGroupPermission)
+def invalidate_system_group_member_cache(sender, instance, **kwargs):
+    if instance.system_group_id:
+        group_id = str(instance.system_group_id)
+        cache.delete("managed_models.SystemGroup.get_system_group_member_ids:" + group_id)
+        cache.delete("managed_models.SystemGroup.get_system_group_member_ids_active_users:" + group_id)
 
 
 class SystemUser(models.Model):
