@@ -70,7 +70,7 @@ class SystemGroup(models.Model):
             for p in spg:
                 if p.emailuser.is_active is True:
                     spg_array.append(p.emailuser.id)
-                cache.set("managed_models.SystemGroup.get_system_group_member_ids_active_users:"+str(self.id), json.dumps(spg_array), 86400)
+            cache.set("managed_models.SystemGroup.get_system_group_member_ids_active_users:"+str(self.id), json.dumps(spg_array), 86400)
         else:
             spg_array = json.loads(spg_array_cache)
         return spg_array    
