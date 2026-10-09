@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='ledger_api_client',
-      version='1.87',
+      version='1.88',
       description='Ledger API Client',
       url='https://github.com/dbca-wa/ledger_api_client',
       author='Department of Biodiversity, Conservation and Attractions',
@@ -9,7 +9,7 @@ setup(name='ledger_api_client',
       license='BSD',
       packages=['ledger_api_client','ledger_api_client.migrations','ledger_api_client.management','ledger_api_client.management.commands',
                 ],
-      install_requires=['django-crispy-forms',],
+      install_requires=['django-crispy-forms','reversion'],
       include_package_data=True,
       zip_safe=False)
 

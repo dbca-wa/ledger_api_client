@@ -10,13 +10,17 @@ from ledger_api_client import managed_models
 from ledger_api_client import ledger_models
 
 from django.contrib.admin.models import LogEntry
-from django.contrib.admin.utils import unquote
+from django.contrib.admin.utils import unquote, quote
 from django.contrib.contenttypes.models import ContentType
 from django.template.response import TemplateResponse
 
 from django.core.exceptions import PermissionDenied
 from django.utils.text import capfirst
 from django.utils.translation import gettext as _
+
+from reversion.admin import VersionAdmin as ReversionVersionAdmin
+from django.urls import reverse
+from reversion.models import Version
 
 #@admin.register(managed_models.SystemGroupPermission)
 class SystemGroupPermissionInline(admin.TabularInline):
@@ -147,5 +151,35 @@ class SystemUserAddressAdmin(ModelAdmin):
     #     else:
     #         super().save_model(request, obj, form, change)
 
+class VersionAdmin(ReversionVersionAdmin):
+
+    def history_view(self, request, object_id, extra_context=None):
+
+        if hasattr(self, 'has_view_or_change_permission'):
+            if not self.has_view_or_change_permission(request):
+                raise PermissionDenied
+        else:
+            if not self.has_change_permission(request):
+                raise PermissionDenied
+
+        opts = self.model._meta
+        action_list = [
+            {
+                "revision": version.revision,
+                "url": reverse(
+                    f"{self.admin_site.name}:{opts.app_label}_{opts.model_name}_revision",
+                    args=(quote(version.object_id), version.id)
+                ),
+            }
+            for version
+            in self._reversion_order_version_queryset(Version.objects.get_for_object_reference(
+                self.model,
+                unquote(object_id),
+            ))
+        ]
+        # Compile the context.
+        context = {"action_list": action_list}
+        context.update(extra_context or {})
+        return super(ReversionVersionAdmin, self).history_view(request, object_id, context)
 
 
