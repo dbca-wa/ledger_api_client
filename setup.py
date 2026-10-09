@@ -9,7 +9,7 @@ setup(name='ledger_api_client',
       license='BSD',
       packages=['ledger_api_client','ledger_api_client.migrations','ledger_api_client.management','ledger_api_client.management.commands',
                 ],
-      install_requires=['django-crispy-forms','reversion'],
+      install_requires=['django-crispy-forms','django-reversion'],
       include_package_data=True,
       zip_safe=False)
 
