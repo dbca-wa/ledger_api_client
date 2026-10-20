@@ -124,6 +124,9 @@ class CreateTokenPaymentSession(APIView):
                     else:
                         ledger_api_client_utils.generate_payment_session(request, invoice_reference, checkout_parameters["return_url"], checkout_parameters["fallback_url"])
 
+                    #create token session var that as alt to system-specific session vars
+                    request.session["token_payment_session"] = invoice_reference
+
         return redirect('/ledger-api/payment-details')
 
 
