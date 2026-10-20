@@ -21,6 +21,11 @@ def update_payments():
     pass
 
 def generate_payment_session(request, invoice_reference, return_url, fallback_url):
+
+    #remove any old token session vars to either be replaced by new token session var or system specific vars
+    if "token_payment_session" in request.session:
+        del request.session["token_payment_session"]
+
     context = {'settings': settings}
     context['data'] = {} 
     cookies = {}
@@ -132,6 +137,10 @@ def create_basket_session(request, emailuser_id, parameters):
         raise ValidationError('Error: Unable to create basket session ') 
 
 def create_checkout_session(request, checkout_parameters):
+
+    #remove any old token session vars to either be replaced by new token session var or system specific vars
+    if "token_payment_session" in request.session:
+        del request.session["token_payment_session"]
 
     django_version = float(str(django.VERSION[0])+'.'+str(django.VERSION[1]))
 
