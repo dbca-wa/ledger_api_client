@@ -779,7 +779,7 @@ def validate_booking_and_invoice_references(booking_reference, invoice_reference
     """
     from ledger_api_client.ledger_models import Invoice, Basket
     
-    baskets = Basket.objects.filter(system=settings.PAYMENT_INTERFACE_SYSTEM_ID).filter(booking_reference=booking_reference).order_by('-date_created')
+    baskets = Basket.objects.filter(booking_reference=booking_reference).order_by('-date_created')
     invoice = Invoice.objects.filter(reference=invoice_reference).last()
 
     order_number = invoice.order_number if invoice else None

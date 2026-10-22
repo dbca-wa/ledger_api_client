@@ -117,6 +117,7 @@ class CreateTokenPaymentSession(APIView):
                         "invoice_text": json_resp['data']['invoice_text'] if 'invoice_text' in json_resp['data'] else None,
                         "basket_owner": json_resp['data']['basket_owner'] if 'basket_owner' in json_resp['data'] else None,
                         "session_type": json_resp['data']['session_type'] if 'session_type' in json_resp['data'] else None,
+                        "force_redirect": json_resp['data']['force_redirect'] if 'force_redirect' in json_resp['data'] else True,
                     }
 
                     if not future_invoice:
