@@ -62,7 +62,7 @@ class SystemGroupAdmin(ModelAdmin):
                     object_id=unquote(object_id),
                     content_type=get_content_type_for_model(model),
                 )
-                .order_by("action_time")
+                .order_by("-action_time")
             )
     
             paginator = self.get_paginator(request, action_list, 100)
